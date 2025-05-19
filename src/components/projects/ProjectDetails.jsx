@@ -30,16 +30,14 @@ const ProjectDetails = () => {
     error: ''
   });
   const [progressPercentage, setProgressPercentage] = useState(0);
-  const [showTimeline, setShowTimeline] = useState(true);
+  // Timeline feature temporarily disabled to fix production build errors
   const [projectStats, setProjectStats] = useState({
     daysRemaining: 0,
     filesCount: 0,
     completionRate: 0,
     lastActivity: null
   });
-  const timelineRef = useRef(null);
-  
-  // Timeline is now implemented directly in the JSX
+  // Timeline feature temporarily removed to fix production build errors
   
   useEffect(() => {
     const fetchProject = async () => {
@@ -523,72 +521,7 @@ const ProjectDetails = () => {
                 )}
               </div>
               
-              {/* Show Timeline if enabled */}
-              {showTimeline && project && (
-                <div ref={timelineRef} className="mt-8 relative">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Project Timeline
-                    <button 
-                      onClick={() => setShowTimeline(!showTimeline)}
-                      className="ml-2 text-sm text-gray-500 hover:text-gray-700"
-                    >
-                      {showTimeline ? '(Hide)' : '(Show)'}
-                    </button>
-                  </h3>
-                  
-                  <div className="timeline-container">
-                    {project.createdAt && (
-                      <div className="timeline-item">
-                        <div className="timeline-marker"></div>
-                        <div className="timeline-content">
-                          <h4 className="font-medium text-gray-900">Project Created</h4>
-                          <p className="text-sm text-gray-500">{new Date(project.createdAt).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {project.acceptedAt && (
-                      <div className="timeline-item">
-                        <div className="timeline-marker"></div>
-                        <div className="timeline-content">
-                          <h4 className="font-medium text-gray-900">Project Accepted</h4>
-                          <p className="text-sm text-gray-500">{new Date(project.acceptedAt).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {project.startedAt && (
-                      <div className="timeline-item">
-                        <div className="timeline-marker"></div>
-                        <div className="timeline-content">
-                          <h4 className="font-medium text-gray-900">In Progress</h4>
-                          <p className="text-sm text-gray-500">{new Date(project.startedAt).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {project.completedAt && (
-                      <div className="timeline-item">
-                        <div className="timeline-marker"></div>
-                        <div className="timeline-content">
-                          <h4 className="font-medium text-gray-900">Completed</h4>
-                          <p className="text-sm text-gray-500">{new Date(project.completedAt).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {project.approvedAt && (
-                      <div className="timeline-item last-item">
-                        <div className="timeline-marker"></div>
-                        <div className="timeline-content">
-                          <h4 className="font-medium text-gray-900">Approved & Paid</h4>
-                          <p className="text-sm text-gray-500">{new Date(project.approvedAt).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* Timeline feature temporarily removed to fix production build errors */}
             </div>
           </div>
         )}
