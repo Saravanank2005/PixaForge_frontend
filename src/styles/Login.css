@@ -1,0 +1,214 @@
+
+
+/* styles/Login.css */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
+
+:root {
+  --primary-color: #4caf50;
+  --primary-dark: #388e3c;
+  --primary-light: #c8e6c9;
+  --accent-color: #ff9800;
+  --danger-color: #f44336;
+  --text-dark: #333;
+  --text-light: #666;
+  --background-light: #f9f9f9;
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.12);
+  --shadow-hard: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --transition-speed: 0.3s;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: var(--background-light);
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom, #f0f8f0, #e8f5e9);
+  min-height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-medium);
+  margin: 2rem auto;
+  max-width: 500px;
+  transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+  border: 1px solid var(--primary-light);
+}
+
+.container:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hard);
+}
+
+.page-title {
+  color: var(--primary-dark);
+  font-weight: 600;
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.page-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 3px;
+}
+
+form {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-speed) ease;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.input-field:hover {
+  border-color: var(--primary-color);
+}
+
+.input-field:focus {
+  border-color: var(--primary-color);
+  border-width: 2px;
+  outline: none;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.submit-button {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  text-transform: none;
+  font-weight: 500;
+  padding: 12px 20px;
+  margin-top: 1rem;
+  transition: all var(--transition-speed) ease;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.submit-button:hover {
+  background-color: var(--primary-dark);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.submit-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.submit-button:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+.register-link {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.register-link a {
+  color: var(--primary-dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-speed) ease;
+}
+
+.register-link a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  form {
+    max-width: 100%;
+  }
+}

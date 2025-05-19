@@ -1,0 +1,127 @@
+/* background.css - Enhanced background styles for the application */
+
+/* Modern geometric background */
+.app-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(#0ea5e9 1px, transparent 1px),
+    radial-gradient(#8b5cf6 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0, 25px 25px;
+  opacity: 0.15;
+  z-index: -1;
+}
+
+/* Diagonal stripe overlay */
+.diagonal-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(14, 165, 233, 0.05),
+    rgba(14, 165, 233, 0.05) 10px,
+    rgba(139, 92, 246, 0.05) 10px,
+    rgba(139, 92, 246, 0.05) 20px
+  );
+  z-index: -1;
+}
+
+/* Abstract shape decorations */
+.shape-decoration {
+  position: fixed;
+  z-index: -1;
+  opacity: 0.4;
+}
+
+.shape-circle {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: rgba(14, 165, 233, 0.1);
+  top: 10%;
+  right: 5%;
+}
+
+.shape-square {
+  width: 200px;
+  height: 200px;
+  background: rgba(139, 92, 246, 0.1);
+  transform: rotate(45deg);
+  bottom: 10%;
+  left: 10%;
+}
+
+.shape-triangle {
+  width: 0;
+  height: 0;
+  border-left: 150px solid transparent;
+  border-right: 150px solid transparent;
+  border-bottom: 260px solid rgba(244, 63, 94, 0.1);
+  top: 40%;
+  left: 20%;
+}
+
+.shape-rectangle {
+  width: 400px;
+  height: 100px;
+  background: rgba(16, 185, 129, 0.1);
+  transform: rotate(-15deg);
+  bottom: 20%;
+  right: 15%;
+}
+
+/* Topographic pattern overlay */
+.topographic-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%230ea5e9' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* Content area styling */
+.content-area {
+  position: relative;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content-area:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .shape-circle,
+  .shape-square,
+  .shape-triangle,
+  .shape-rectangle {
+    opacity: 0.2;
+    transform-origin: center;
+    transform: scale(0.7);
+  }
+  
+  .content-area {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+}

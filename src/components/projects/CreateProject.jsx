@@ -1,0 +1,352 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import api from '../../utils/api';
+import { useAuth } from '../../contexts/AuthContext';
+
+const CreateProject = () => {
+  const { isClient } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Extract designerId from URL query params if available
+  const queryParams = new URLSearchParams(location.search);
+  const preselectedDesignerId = queryParams.get('designerId');
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    designerId: preselectedDesignerId || '',
+    budget: '',
+    deliverables: '',
+    deadline: ''
+  });
+  
+  const [designers, setDesigners] = useState([]);
+  const [selectedDesigner, setSelectedDesigner] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [designersLoading, setDesignersLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  // Redirect if not a client
+  useEffect(() => {
+    if (!isClient) {
+      navigate('/app/projects');
+    }
+  }, [isClient, navigate]);
+  
+  // Fetch designers
+  useEffect(() => {
+    const fetchDesigners = async () => {
+      try {
+        setDesignersLoading(true);
+        const response = await api.get('/api/designers');
+        setDesigners(response.data);
+        
+        // If a designer ID is preselected, find that designer's details
+        if (preselectedDesignerId) {
+          const designer = response.data.find(d => d._id === preselectedDesignerId);
+          if (designer) {
+            setSelectedDesigner(designer);
+          }
+        }
+        
+        setDesignersLoading(false);
+      } catch (error) {
+        console.error('Error fetching designers:', error);
+        setDesignersLoading(false);
+      }
+    };
+    
+    fetchDesigners();
+  }, [preselectedDesignerId]);
+  
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    
+    // Update selected designer when designerId changes
+    if (name === 'designerId' && value) {
+      const designer = designers.find(d => d._id === value);
+      setSelectedDesigner(designer || null);
+    }
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate form
+    if (!formData.title || !formData.description || !formData.designerId || !formData.budget) {
+      setError('Please fill in all required fields');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await api.post('/api/projects', {
+        ...formData,
+        budget: parseFloat(formData.budget),
+        deadline: formData.deadline || undefined
+      });
+      
+      // Redirect to the new project page
+      navigate(`/app/projects/${response.data.project._id}`);
+    } catch (error) {
+      console.error('Error creating project:', error);
+      setError(error.response?.data?.error || 'Failed to create project. Please try again.');
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Create New Project</h1>
+        <p className="text-gray-600">
+          Define your project details and hire a designer to bring your vision to life.
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Project Form */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg shadow p-6">
+            {error && (
+              <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Project Title *
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="E.g., Logo Design for My Startup"
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Project Description *
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="5"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Describe your project in detail, including your requirements and expectations..."
+                  required
+                ></textarea>
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="designerId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Designer *
+                </label>
+                {designersLoading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary-600 mr-2"></div>
+                    <span className="text-sm text-gray-500">Loading designers...</span>
+                  </div>
+                ) : designers.length === 0 ? (
+                  <p className="text-sm text-gray-500">
+                    No designers available. <Link to="/app/designers" className="text-primary-600 hover:text-primary-800">Browse designers</Link>
+                  </p>
+                ) : (
+                  <select
+                    id="designerId"
+                    name="designerId"
+                    value={formData.designerId}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    required
+                  >
+                    <option value="">Select a designer</option>
+                    {designers.map(designer => (
+                      <option key={designer._id} value={designer._id}>
+                        {designer.username} {designer.hourlyRate ? `($${designer.hourlyRate}/hr)` : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
+                  Budget (USD) *
+                </label>
+                <input
+                  type="number"
+                  id="budget"
+                  name="budget"
+                  value={formData.budget}
+                  onChange={handleChange}
+                  min="1"
+                  step="0.01"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Enter your budget"
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="deliverables" className="block text-sm font-medium text-gray-700 mb-1">
+                  Deliverables
+                </label>
+                <textarea
+                  id="deliverables"
+                  name="deliverables"
+                  rows="3"
+                  value={formData.deliverables}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="List the specific deliverables you expect (e.g., 3 logo concepts, source files, etc.)"
+                ></textarea>
+              </div>
+              
+              <div className="mb-6">
+                <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 mb-1">
+                  Deadline
+                </label>
+                <input
+                  type="date"
+                  id="deadline"
+                  name="deadline"
+                  value={formData.deadline}
+                  onChange={handleChange}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              
+              <div className="flex items-center justify-end space-x-3">
+                <Link
+                  to="/app/projects"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
+                  Cancel
+                </Link>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Creating...' : 'Create Project'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        {/* Designer Preview */}
+        <div className="lg:col-span-1">
+          {selectedDesigner ? (
+            <div className="bg-white rounded-lg shadow overflow-hidden sticky top-20">
+              <div className="p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Selected Designer</h2>
+                
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium">
+                      {selectedDesigner.username.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                  
+                  <div className="ml-3">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {selectedDesigner.username}
+                    </h3>
+                    
+                    {selectedDesigner.averageRating > 0 && (
+                      <div className="flex items-center mt-1">
+                        <span className="text-yellow-500 mr-1">★</span>
+                        <span className="text-sm">{selectedDesigner.averageRating.toFixed(1)}</span>
+                        <span className="text-xs text-gray-500 ml-1">
+                          ({selectedDesigner.ratings.length} reviews)
+                        </span>
+                      </div>
+                    )}
+                    
+                    {selectedDesigner.hourlyRate && (
+                      <p className="mt-1 text-sm text-gray-600">
+                        Rate: ${selectedDesigner.hourlyRate}/hr
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                {selectedDesigner.skills && selectedDesigner.skills.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Skills</h4>
+                    <div className="flex flex-wrap">
+                      {selectedDesigner.skills.map(skill => (
+                        <span
+                          key={skill._id || skill.name}
+                          className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full mr-1 mb-1"
+                        >
+                          {skill.name} {skill.rate && `($${skill.rate}/hr)`}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {selectedDesigner.bio && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">About</h4>
+                    <p className="text-sm text-gray-600 line-clamp-4">
+                      {selectedDesigner.bio}
+                    </p>
+                  </div>
+                )}
+                
+                <div className="mt-6">
+                  <Link
+                    to={`/app/designers/${selectedDesigner._id}`}
+                    className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Full Profile →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Designer Preview</h2>
+              <p className="text-gray-500">
+                Select a designer to see their details here.
+              </p>
+              <div className="mt-4">
+                <Link
+                  to="/app/designers"
+                  className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                >
+                  Browse Designers →
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CreateProject;

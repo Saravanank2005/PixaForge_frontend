@@ -1,0 +1,340 @@
+/* theme.css - Light and Dark mode styling for GraphIO-PixaForge */
+
+/* Light Mode Variables (Default) */
+:root {
+  /* General Colors */
+  --primary-50: #f0f9ff;
+  --primary-100: #e0f2fe;
+  --primary-200: #bae6fd;
+  --primary-300: #7dd3fc;
+  --primary-400: #38bdf8;
+  --primary-500: #0ea5e9;
+  --primary-600: #0284c7;
+  --primary-700: #0369a1;
+  --primary-800: #075985;
+  --primary-900: #0c4a6e;
+  
+  /* Background Colors */
+  --bg-main: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-hover: #f0f9ff;
+  --bg-active: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+  
+  /* Text Colors */
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverted: #ffffff;
+  
+  /* Border Colors */
+  --border-light: #e2e8f0;
+  --border-medium: #cbd5e1;
+  --border-dark: #94a3b8;
+  
+  /* Shadow Colors */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Status Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  
+  /* Specific Component Variables */
+  --navbar-bg: #ffffff;
+  --navbar-border: #e2e8f0;
+  --navbar-text: #1e293b;
+  --navbar-icon: #64748b;
+  --navbar-icon-hover: #0ea5e9;
+  
+  --sidebar-bg: #ffffff;
+  --sidebar-hover: #f0f9ff;
+  --sidebar-active: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+  --sidebar-text: #1e293b;
+  --sidebar-text-active: #ffffff;
+  --sidebar-icon: #64748b;
+  --sidebar-icon-active: #ffffff;
+  --sidebar-border: #e2e8f0;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  --glass-blur: blur(10px);
+}
+
+/* Dark Mode Variables */
+.dark-mode {
+  /* General Colors - Keep primary colors the same */
+  --primary-50: #f0f9ff;
+  --primary-100: #e0f2fe;
+  --primary-200: #bae6fd;
+  --primary-300: #7dd3fc;
+  --primary-400: #38bdf8;
+  --primary-500: #0ea5e9;
+  --primary-600: #0284c7;
+  --primary-700: #0369a1;
+  --primary-800: #075985;
+  --primary-900: #0c4a6e;
+  
+  /* Background Colors */
+  --bg-main: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+  --bg-active: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+  
+  /* Text Colors - Improved contrast for dark mode */
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-tertiary: #cbd5e1;
+  --text-inverted: #0f172a;
+  
+  /* Border Colors */
+  --border-light: #334155;
+  --border-medium: #475569;
+  --border-dark: #64748b;
+  
+  /* Shadow Colors */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  
+  /* Status Colors - Slightly muted for dark mode */
+  --success: #059669;
+  --warning: #d97706;
+  --error: #dc2626;
+  --info: #2563eb;
+  
+  /* Specific Component Variables */
+  --navbar-bg: #1e293b;
+  --navbar-border: #334155;
+  --navbar-text: #f8fafc;
+  --navbar-icon: #e2e8f0;
+  --navbar-icon-hover: #38bdf8;
+  
+  --sidebar-bg: #1e293b;
+  --sidebar-hover: #334155;
+  --sidebar-active: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+  --sidebar-text: #f8fafc;
+  --sidebar-text-active: #ffffff;
+  --sidebar-icon: #e2e8f0;
+  --sidebar-icon-active: #ffffff;
+  --sidebar-border: #334155;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  --glass-border: rgba(30, 41, 59, 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --glass-blur: blur(10px);
+}
+
+/* Apply theme variables to elements */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Card styling */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Button styling */
+.btn-primary {
+  background-color: var(--primary-600);
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-700);
+}
+
+.btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Input styling */
+input, textarea, select {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary-500);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+}
+
+/* Dark mode toggle button */
+.theme-toggle {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--primary-500);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.dark-mode .theme-toggle {
+  background-color: var(--primary-900);
+}
+
+.dark-mode .theme-toggle::after {
+  transform: translateX(24px);
+  background-color: var(--primary-300);
+}
+
+/* Theme icons */
+.theme-icon {
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.dark-mode .theme-icon {
+  color: var(--primary-300);
+}
+
+/* Table styling */
+table {
+  border-color: var(--border-light);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-secondary);
+}
+
+tr:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Code blocks */
+pre, code {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+/* Links */
+a {
+  color: var(--primary-600);
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--primary-700);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--border-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--border-dark);
+}
+
+/* Dark mode text overrides for better visibility */
+.dark-mode h1, 
+.dark-mode h2, 
+.dark-mode h3, 
+.dark-mode h4, 
+.dark-mode h5, 
+.dark-mode h6 {
+  color: var(--text-primary);
+}
+
+.dark-mode p, 
+.dark-mode span, 
+.dark-mode div {
+  color: var(--text-secondary);
+}
+
+.dark-mode .text-gray-800 {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .text-gray-700 {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode .text-gray-400 {
+  color: var(--text-tertiary) !important;
+}
+
+/* Ensure form labels are visible */
+.dark-mode label {
+  color: var(--text-primary);
+}
+
+/* Make sure card titles are visible */
+.dark-mode .card h2,
+.dark-mode .glass h2,
+.dark-mode .card h3,
+.dark-mode .glass h3 {
+  color: var(--text-primary);
+}
