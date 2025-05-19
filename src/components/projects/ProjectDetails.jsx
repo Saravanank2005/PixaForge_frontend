@@ -39,6 +39,49 @@ const ProjectDetails = () => {
   });
   const timelineRef = useRef(null);
   
+  // Timeline rendering function
+  const renderTimeline = () => {
+    if (!project) return null;
+    
+    const timelineEvents = [
+      { status: 'created', label: 'Project Created', date: new Date(project.createdAt), icon: <DocumentIcon className="h-5 w-5" /> },
+      { status: 'accepted', label: 'Project Accepted', date: project.acceptedAt ? new Date(project.acceptedAt) : null, icon: <CheckCircleIcon className="h-5 w-5" /> },
+      { status: 'in_progress', label: 'In Progress', date: project.startedAt ? new Date(project.startedAt) : null, icon: <ClockIcon className="h-5 w-5" /> },
+      { status: 'completed', label: 'Completed', date: project.completedAt ? new Date(project.completedAt) : null, icon: <CheckBadgeIcon className="h-5 w-5" /> },
+      { status: 'approved', label: 'Approved & Paid', date: project.approvedAt ? new Date(project.approvedAt) : null, icon: <CurrencyDollarIcon className="h-5 w-5" /> }
+    ];
+    
+    // Filter out events that haven't happened yet
+    const validEvents = timelineEvents.filter(event => event.date);
+    
+    return (
+      <div ref={timelineRef} className="mt-8 relative">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <ChartBarIcon className="h-5 w-5 mr-2" />
+          Project Timeline
+          <button 
+            onClick={() => setShowTimeline(!showTimeline)}
+            className="ml-2 text-sm text-gray-500 hover:text-gray-700"
+          >
+            {showTimeline ? '(Hide)' : '(Show)'}
+          </button>
+        </h3>
+        
+        <div className="timeline-container">
+          {validEvents.map((event, index) => (
+            <div key={event.status} className={`timeline-item ${index === validEvents.length - 1 ? 'last-item' : ''}`}>
+              <div className="timeline-marker">{event.icon}</div>
+              <div className="timeline-content">
+                <h4 className="font-medium text-gray-900">{event.label}</h4>
+                <p className="text-sm text-gray-500">{event.date.toLocaleDateString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  
   useEffect(() => {
     const fetchProject = async () => {
       try {
