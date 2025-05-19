@@ -526,8 +526,7 @@ const ProjectDetails = () => {
               {/* Show Timeline if enabled */}
               {showTimeline && project && (
                 <div ref={timelineRef} className="mt-8 relative">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <ChartBarIcon className="h-5 w-5 mr-2" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
                     Project Timeline
                     <button 
                       onClick={() => setShowTimeline(!showTimeline)}
@@ -538,23 +537,55 @@ const ProjectDetails = () => {
                   </h3>
                   
                   <div className="timeline-container">
-                    {[
-                      { status: 'created', label: 'Project Created', date: new Date(project.createdAt), icon: <DocumentIcon className="h-5 w-5" /> },
-                      { status: 'accepted', label: 'Project Accepted', date: project.acceptedAt ? new Date(project.acceptedAt) : null, icon: <CheckCircleIcon className="h-5 w-5" /> },
-                      { status: 'in_progress', label: 'In Progress', date: project.startedAt ? new Date(project.startedAt) : null, icon: <ClockIcon className="h-5 w-5" /> },
-                      { status: 'completed', label: 'Completed', date: project.completedAt ? new Date(project.completedAt) : null, icon: <CheckBadgeIcon className="h-5 w-5" /> },
-                      { status: 'approved', label: 'Approved & Paid', date: project.approvedAt ? new Date(project.approvedAt) : null, icon: <CurrencyDollarIcon className="h-5 w-5" /> }
-                    ]
-                    .filter(event => event.date)
-                    .map((event, index, validEvents) => (
-                      <div key={event.status} className={`timeline-item ${index === validEvents.length - 1 ? 'last-item' : ''}`}>
-                        <div className="timeline-marker">{event.icon}</div>
+                    {project.createdAt && (
+                      <div className="timeline-item">
+                        <div className="timeline-marker"></div>
                         <div className="timeline-content">
-                          <h4 className="font-medium text-gray-900">{event.label}</h4>
-                          <p className="text-sm text-gray-500">{event.date.toLocaleDateString()}</p>
+                          <h4 className="font-medium text-gray-900">Project Created</h4>
+                          <p className="text-sm text-gray-500">{new Date(project.createdAt).toLocaleDateString()}</p>
                         </div>
                       </div>
-                    ))}
+                    )}
+                    
+                    {project.acceptedAt && (
+                      <div className="timeline-item">
+                        <div className="timeline-marker"></div>
+                        <div className="timeline-content">
+                          <h4 className="font-medium text-gray-900">Project Accepted</h4>
+                          <p className="text-sm text-gray-500">{new Date(project.acceptedAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {project.startedAt && (
+                      <div className="timeline-item">
+                        <div className="timeline-marker"></div>
+                        <div className="timeline-content">
+                          <h4 className="font-medium text-gray-900">In Progress</h4>
+                          <p className="text-sm text-gray-500">{new Date(project.startedAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {project.completedAt && (
+                      <div className="timeline-item">
+                        <div className="timeline-marker"></div>
+                        <div className="timeline-content">
+                          <h4 className="font-medium text-gray-900">Completed</h4>
+                          <p className="text-sm text-gray-500">{new Date(project.completedAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {project.approvedAt && (
+                      <div className="timeline-item last-item">
+                        <div className="timeline-marker"></div>
+                        <div className="timeline-content">
+                          <h4 className="font-medium text-gray-900">Approved & Paid</h4>
+                          <p className="text-sm text-gray-500">{new Date(project.approvedAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
