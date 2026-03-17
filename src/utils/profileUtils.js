@@ -111,12 +111,38 @@ export const removePortfolioItem = async (itemId) => {
  */
 export const updateUserProfile = async (profileData, userType) => {
   try {
+    // Validate required fields
+    if (!profileData.username || !profileData.email) {
+      throw new Error('Username and email are required');
+    }
+    
+    // Create a clean data object with only the fields the backend expects
+    const cleanData = {
+      username: profileData.username,
+      email: profileData.email,
+      bio: profileData.bio || ''
+    };
+    
+    // Format location as a string if it exists
+    // The backend expects location as a string that can be parsed with JSON.parse
+    if (profileData.location) {
+      if (typeof profileData.location === 'object') {
+        cleanData.location = JSON.stringify(profileData.location);
+      } else {
+        cleanData.location = JSON.stringify({ type: 'Point', coordinates: [0, 0] });
+      }
+    }
+    
     // Use the appropriate endpoint based on user type
     const endpoint = userType === 'designer' 
       ? '/api/designers/profile'
       : '/api/auth/profile';
+    
+    console.log(`Using endpoint: ${endpoint} for user type: ${userType || 'unknown'}`);
+    console.log('Sending clean profile data:', cleanData);
       
-    const response = await api.put(endpoint, profileData);
+    const response = await api.put(endpoint, cleanData);
+    console.log('Profile update successful:', response.data);
     return response.data;
   } catch (error) {
     console.error('Profile update error:', error);

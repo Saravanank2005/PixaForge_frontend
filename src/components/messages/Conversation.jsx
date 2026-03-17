@@ -4,10 +4,11 @@ import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import ChatMessage from './ChatMessage';
 
-const Conversation = () => {
-  const { userId } = useParams();
+const ConversationFixed = () => {
   const params = useParams();
+  const { userId } = params;
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
@@ -27,20 +28,9 @@ const Conversation = () => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   
-  // Reaction emojis
-  const reactionEmojis = [
-    { emoji: '👍', name: 'thumbs up' },
-    { emoji: '❤️', name: 'heart' },
-    { emoji: '😂', name: 'laugh' },
-    { emoji: '😮', name: 'wow' },
-    { emoji: '😢', name: 'sad' }
-  ];
-  
   // Extract projectId from params or query params if available
-  const projectIdFromParams = params.projectId;
   const queryParams = new URLSearchParams(location.search);
-  const projectIdFromQuery = queryParams.get('projectId');
-  const projectId = projectIdFromParams || projectIdFromQuery;
+  const projectId = params.projectId || queryParams.get('projectId');
   
   useEffect(() => {
     // If no userId is provided, redirect to messages list
@@ -56,7 +46,6 @@ const Conversation = () => {
         setOtherUser(response.data);
       } catch (error) {
         console.error('Error fetching user data:', error);
-        // More specific error message based on error type
         if (error.response && error.response.status === 404) {
           setError('User not found. They may have deleted their account.');
         } else if (error.response && error.response.status === 403) {
@@ -78,7 +67,6 @@ const Conversation = () => {
         setLoading(false);
       } catch (error) {
         console.error('Error fetching messages:', error);
-        // More specific error message based on error type
         if (error.response && error.response.status === 404) {
           setError('Conversation not found.');
         } else if (error.response && error.response.status === 403) {
@@ -114,7 +102,7 @@ const Conversation = () => {
       setError('Invalid user ID. Redirecting to messages...');
       setTimeout(() => navigate('/app/messages'), 1500);
     }
-  }, [userId, projectId]);
+  }, [userId, projectId, navigate]);
   
   // Socket.io event listeners
   useEffect(() => {
@@ -123,9 +111,7 @@ const Conversation = () => {
     // Listen for incoming messages
     socket.on('receiveMessage', (message) => {
       if (message.sender === userId || message.recipient === userId) {
-        setMessages((prevMessages) => [...prevMessages, message]);
-        // Reset typing indicator when message is received
-        setOtherUserTyping(false);
+        setMessages(prevMessages => [...prevMessages, message]);
       }
     });
     
@@ -134,12 +120,11 @@ const Conversation = () => {
       if (typingUserId === userId) {
         setOtherUserTyping(true);
         
-        // Clear previous timeout
+        // Auto-clear typing indicator after 3 seconds of no updates
         if (typingTimeoutRef.current) {
           clearTimeout(typingTimeoutRef.current);
         }
         
-        // Set timeout to clear typing indicator after 3 seconds
         typingTimeoutRef.current = setTimeout(() => {
           setOtherUserTyping(false);
         }, 3000);
@@ -152,70 +137,11 @@ const Conversation = () => {
       }
     });
     
-    // Listen for message reactions
-    socket.on('messageReaction', ({ messageId, emoji, userId: reactorId }) => {
-      console.log('Received message reaction:', { messageId, emoji, reactorId });
-      
-      if (!messageId || !emoji || !reactorId) {
-        console.error('Invalid reaction data received:', { messageId, emoji, reactorId });
-        return;
-      }
-      
-      setMessages(prevMessages => {
-        try {
-          // Find the message in our current state
-          const messageIndex = prevMessages.findIndex(msg => msg._id === messageId);
-          if (messageIndex === -1) {
-            console.log(`Message ${messageId} not found in current state`);
-            return prevMessages;
-          }
-          
-          const message = prevMessages[messageIndex];
-          // Ensure reactions array exists
-          const reactions = Array.isArray(message.reactions) ? [...message.reactions] : [];
-          
-          // Check if this user already reacted with this emoji
-          const existingReactionIndex = reactions.findIndex(
-            r => r && r.user === reactorId && r.emoji === emoji
-          );
-          
-          let updatedReactions;
-          
-          if (existingReactionIndex >= 0) {
-            // Remove the reaction if it already exists
-            updatedReactions = [...reactions];
-            updatedReactions.splice(existingReactionIndex, 1);
-            console.log(`Removed reaction from ${reactorId}`);
-          } else {
-            // Add the new reaction
-            updatedReactions = [
-              ...reactions,
-              { user: reactorId, emoji, timestamp: new Date() }
-            ];
-            console.log(`Added reaction from ${reactorId}`);
-          }
-          
-          // Create a new messages array with the updated message
-          const updatedMessages = [...prevMessages];
-          updatedMessages[messageIndex] = {
-            ...message,
-            reactions: updatedReactions
-          };
-          
-          return updatedMessages;
-        } catch (error) {
-          console.error('Error processing reaction in socket handler:', error);
-          return prevMessages;
-        }
-      });
-    });
-    
     // Clean up event listeners
     return () => {
       socket.off('receiveMessage');
       socket.off('userTyping');
       socket.off('userStoppedTyping');
-      socket.off('messageReaction');
       
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -230,11 +156,11 @@ const Conversation = () => {
   
   // Handle typing indicator
   const handleTyping = () => {
-    if (!isTyping && socket && userId) {
+    if (!isTyping && socket) {
       setIsTyping(true);
       socket.emit('typing', { recipientId: userId });
       
-      // Clear typing status after 3 seconds of inactivity
+      // Reset typing status after 2 seconds of no input
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
@@ -242,7 +168,7 @@ const Conversation = () => {
       typingTimeoutRef.current = setTimeout(() => {
         setIsTyping(false);
         socket.emit('stopTyping', { recipientId: userId });
-      }, 3000);
+      }, 2000);
     }
   };
   
@@ -256,123 +182,45 @@ const Conversation = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     
-    if (!newMessage.trim() || !userId || userId === 'undefined') {
-      setError('Cannot send message: Invalid recipient');
-      return;
-    }
+    if (!newMessage.trim() || sending) return;
     
     try {
       setSending(true);
       
       const messageData = {
         receiverId: userId,
-        content: newMessage,
+        content: newMessage.trim(),
         projectId: projectId || undefined
       };
       
       const response = await api.post('/api/messages', messageData);
       
-      // Add the new message to the list
-      setMessages([...messages, response.data.message]);
+      // Add the new message to the conversation
+      setMessages(prevMessages => [...prevMessages, response.data]);
       
-      // Clear input and typing indicator
+      // Clear the input field
       setNewMessage('');
+      
+      // Reset typing status
       setIsTyping(false);
       if (socket) {
         socket.emit('stopTyping', { recipientId: userId });
       }
       
-      setSending(false);
+      // Clear any error messages
+      if (error) setError(null);
+      
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Failed to send message. Please try again.');
+    } finally {
       setSending(false);
     }
   };
   
-  // Handle message reaction
-  const handleReaction = async (messageId, emoji) => {
-    try {
-      // Validate inputs
-      if (!messageId || !emoji || !currentUser?._id) {
-        console.error('Invalid reaction parameters:', { messageId, emoji, currentUserId: currentUser?._id });
-        return;
-      }
-
-      // Find the message in the current list
-      const messageIndex = messages.findIndex(msg => msg._id === messageId);
-      if (messageIndex === -1) {
-        console.error('Message not found in local state:', messageId);
-        return;
-      }
-      
-      const message = messages[messageIndex];
-      
-      // Check if user already reacted with this emoji
-      const reactions = message.reactions || [];
-      const existingReactionIndex = reactions.findIndex(
-        r => r.user === currentUser._id && r.emoji === emoji
-      );
-      
-      let updatedReactions;
-      
-      if (existingReactionIndex >= 0) {
-        // Remove the reaction if it already exists
-        updatedReactions = [...reactions];
-        updatedReactions.splice(existingReactionIndex, 1);
-      } else {
-        // Add the new reaction
-        updatedReactions = [
-          ...reactions,
-          { user: currentUser._id, emoji, timestamp: new Date() }
-        ];
-      }
-      
-      // Update the message in the local state first (optimistic update)
-      const updatedMessages = [...messages];
-      updatedMessages[messageIndex] = {
-        ...message,
-        reactions: updatedReactions
-      };
-      
-      setMessages(updatedMessages);
-      
-      try {
-        // Send the update to the server
-        await api.post(`/api/messages/${messageId}/reaction`, { emoji });
-        
-        // Determine the recipient ID for the socket event
-        const recipientId = message.senderId === currentUser._id 
-          ? message.receiverId 
-          : message.senderId;
-        
-        // Use the socket to send the reaction in real-time
-        if (socket) {
-          socket.emit('messageReaction', {
-            messageId,
-            emoji,
-            recipientId
-          });
-        }
-      } catch (apiError) {
-        console.error('API error adding reaction:', apiError);
-        // Revert the optimistic update if the API call fails
-        setMessages(messages);
-        setError('Failed to save reaction. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error handling reaction:', error);
-      setError('Failed to process reaction. Please try again.');
-    }
-  };
-  
-  // Toggle reaction menu
-  const toggleReactionMenu = (messageId) => {
-    setSelectedMessageId(selectedMessageId === messageId ? null : messageId);
-  };
-  
-  // Format timestamp
+  // Format timestamp for display
   const formatTime = (timestamp) => {
+    if (!timestamp) return '';
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
@@ -384,17 +232,22 @@ const Conversation = () => {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     
+    // If today, show "Today"
     if (date.toDateString() === today.toDateString()) {
       return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    } else {
-      // Format as DD.MM.YYYY
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-      return `${day}.${month}.${year}`;
     }
+    
+    // If yesterday, show "Yesterday"
+    if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    }
+    
+    // Otherwise, show the date
+    return date.toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric'
+    });
   };
   
   // Group messages by date
@@ -557,145 +410,15 @@ const Conversation = () => {
                 const isCurrentUser = message.sender === currentUser?._id;
                 
                 return (
-                  <motion.div
+                  <ChatMessage
                     key={message._id || messageIndex}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: messageIndex * 0.05 }}
-                    className={`flex flex-col mb-4 ${isCurrentUser ? 'items-end' : 'items-start'} group`}
-                  >
-                    <div className="flex items-end">
-                      {!isCurrentUser && (
-                        <div className="flex-shrink-0 mr-2 self-end mb-1">
-                          <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-medium shadow-sm">
-                            {otherUser?.username?.charAt(0).toUpperCase() || '?'}
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="relative flex items-center">
-                        {isCurrentUser && (
-                          <div className="relative order-2">
-                            <button 
-                              onClick={() => toggleReactionMenu(message._id)}
-                              className="mr-2 p-2 rounded-full bg-white shadow-md border border-gray-200 text-amber-500 hover:bg-amber-50 transition-all duration-150 hover:scale-110 opacity-0 group-hover:opacity-100"
-                              aria-label="Add reaction"
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 0 3 3 0 014.242 0 1 1 0 001.415-1.415 5 5 0 00-7.072 0 1 1 0 000 1.415z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            
-                            {/* Reaction menu for current user's messages */}
-                            <AnimatePresence>
-                              {selectedMessageId === message._id && (
-                                <motion.div 
-                                  initial={{ opacity: 0, scale: 0.8 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.8 }}
-                                  className="absolute top-1/2 -translate-y-1/2 right-full mr-2 bg-white rounded-lg shadow-lg p-2 flex space-x-2 z-20 border border-gray-200"
-                                >
-                                  {['👍', '❤️', '😂', '😮', '😢'].map(emoji => (
-                                    <button
-                                      key={emoji}
-                                      onClick={() => {
-                                        handleReaction(message._id, emoji);
-                                        setSelectedMessageId(null);
-                                      }}
-                                      className="p-2 hover:bg-amber-50 rounded-full transition-colors"
-                                      title={emoji}
-                                    >
-                                      <span className="text-xl">{emoji}</span>
-                                    </button>
-                                  ))}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-                        
-                        <div 
-                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm order-1 ${
-                            isCurrentUser 
-                              ? 'bg-primary-600 text-white rounded-br-none' 
-                              : 'bg-white border border-gray-100 text-gray-800 rounded-bl-none'
-                          }`}
-                        >
-                          <p className="break-words leading-relaxed">{message.content}</p>
-                          <p className={`text-xs text-right ${
-                            isCurrentUser ? 'text-primary-100' : 'text-gray-500'
-                          }`}>
-                            {formatTime(message.createdAt)}
-                          </p>
-                        </div>
-                        
-                        {!isCurrentUser && (
-                          <div className="relative order-3">
-                            <button 
-                              onClick={() => toggleReactionMenu(message._id)}
-                              className="ml-2 p-2 rounded-full bg-white shadow-md border border-gray-200 text-amber-500 hover:bg-amber-50 transition-all duration-150 hover:scale-110 opacity-0 group-hover:opacity-100"
-                              aria-label="Add reaction"
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 0 3 3 0 014.242 0 1 1 0 001.415-1.415 5 5 0 00-7.072 0 1 1 0 000 1.415z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            
-                            {/* Reaction menu for other users' messages */}
-                            <AnimatePresence>
-                              {selectedMessageId === message._id && (
-                                <motion.div 
-                                  initial={{ opacity: 0, scale: 0.8 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.8 }}
-                                  className="absolute top-1/2 -translate-y-1/2 left-full ml-2 bg-white rounded-lg shadow-lg p-2 flex space-x-2 z-20 border border-gray-200"
-                                >
-                                  {['👍', '❤️', '😂', '😮', '😢'].map(emoji => (
-                                    <button
-                                      key={emoji}
-                                      onClick={() => {
-                                        handleReaction(message._id, emoji);
-                                        setSelectedMessageId(null);
-                                      }}
-                                      className="p-2 hover:bg-amber-50 rounded-full transition-colors"
-                                      title={emoji}
-                                    >
-                                      <span className="text-xl">{emoji}</span>
-                                    </button>
-                                  ))}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Reaction menu has been moved directly next to the reaction button */}
-                    
-                    {/* Display reactions */}
-                    {message.reactions && Array.isArray(message.reactions) && message.reactions.length > 0 && (
-                      <div 
-                        className={`flex mt-1 mb-1 ${isCurrentUser ? 'justify-end mr-1' : 'justify-start ml-10'}`}
-                      >
-                        <div className="bg-white shadow-sm rounded-full px-2 py-0.5 flex items-center space-x-1 border border-gray-100">
-                          {Array.from(new Set(message.reactions.map(r => r?.emoji).filter(Boolean))).map(emoji => {
-                            const count = message.reactions.filter(r => r?.emoji === emoji).length;
-                            return (
-                              <div 
-                                key={emoji} 
-                                className="flex items-center"
-                                title={`${count} ${count === 1 ? 'person' : 'people'}`}
-                              >
-                                <span className="text-sm">{emoji}</span>
-                                {count > 1 && <span className="text-xs text-gray-500 ml-0.5">{count}</span>}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
+                    message={message.content}
+                    isCurrentUser={isCurrentUser}
+                    currentUser={currentUser}
+                    otherUser={otherUser}
+                    timestamp={message.createdAt}
+                    showAvatar={true}
+                  />
                 );
               })}
             </div>
@@ -778,11 +501,9 @@ const Conversation = () => {
           </button>
         </form>
       </div>
-      
-      {/* No tooltips needed - using native title attributes */}
     </motion.div>
   );
 };
 
-export default Conversation;
-
+export default ConversationFixed;
+9

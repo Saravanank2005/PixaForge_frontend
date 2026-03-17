@@ -10,13 +10,8 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   
-  // Set token in localStorage and for API requests
-  useEffect(() => {
-    if (token) {
-      // Token is already handled by the api utility interceptors
-      // No need to set headers here
-    }
-  }, [token]);
+  // Token is already handled by the api utility interceptors
+  useEffect(() => {}, [token]);
   
   // Load user data on initial render if token exists
   useEffect(() => {
@@ -78,9 +73,7 @@ export const AuthProvider = ({ children }) => {
         // Remove any fields not expected by the server
       };
       
-      console.log('Sending registration request with data:', registrationData);
       const res = await api.post('/api/auth/register', registrationData);
-      console.log('Registration response:', res.data);
       const { token, userId, userType } = res.data;
       
       if (token) {
@@ -98,9 +91,6 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Registration error:', error);
-      console.error('Error response data:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      console.error('Error headers:', error.response?.headers);
       return { 
         success: false, 
         message: error.response?.data?.error || 'Registration failed' 

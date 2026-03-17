@@ -112,13 +112,22 @@ const Profile = () => {
     setSuccess('');
 
     try {
+      // Prepare the data for update
       const updatedData = {
         username: formData.username,
         email: formData.email,
-        bio: formData.bio,
-        location: formData.location,
-        skills: formData.skills
+        bio: formData.bio || '',
+        // Location will be stringified in the updateUserProfile function
+        location: formData.location || { type: 'Point', coordinates: [0, 0] }
       };
+      
+      // Include skills only for designer profiles
+      if (currentUser?.userType === 'designer') {
+        updatedData.skills = formData.skills || [];
+      }
+      
+      // For debugging
+      console.log('Preparing profile update with data:', updatedData);
 
       const response = await updateUserProfile(updatedData, currentUser?.userType);
       
@@ -128,7 +137,7 @@ const Profile = () => {
       }
     } catch (err) {
       console.error('Profile update error:', err);
-      setError(err.response?.data?.error || 'Failed to update profile');
+      setError(err.response?.data?.error || 'Failed to update profile: ' + (err.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }

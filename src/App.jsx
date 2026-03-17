@@ -4,7 +4,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
-import Toast from './components/common/Toast';
+
 import ScrollProgress from './components/common/ScrollProgress';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/auth/PrivateRoute';

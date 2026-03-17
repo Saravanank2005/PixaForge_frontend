@@ -1,8 +1,14 @@
 import axios from 'axios';
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV
+    ? 'http://localhost:5000'
+    : 'https://pixaforge-backend.onrender.com');
+
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: 'https://pixaforge-backend.onrender.com',
+  baseURL: API_BASE_URL,
   timeout: 10000,
 });
 

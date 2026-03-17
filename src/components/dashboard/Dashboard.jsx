@@ -57,51 +57,44 @@ const Dashboard = () => {
         // Update stats immediately with what we have
         setStats(baseStats);
         
-        // For clients only: fetch designer stats with geolocation
+        // For clients only: fetch designer stats
         if (isClient) {
+          let designerStats = { total: 0, nearby: 0 };
+          
           try {
-            const position = await new Promise((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                timeout: 10000,
-                maximumAge: 60000
-              });
-            });
+            // First get all designers regardless of location
+            const designersRes = await api.get('/api/designers');
+            designerStats.total = designersRes.data.length;
             
-            // Fetch designer stats in parallel
-            const [designersRes, nearbyDesignersRes] = await Promise.all([
-              api.get('/api/designers'),
-              api.get('/api/designers', {
+            // Try to get nearby designers if geolocation is available
+            try {
+              const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                  timeout: 10000,
+                  maximumAge: 60000
+                });
+              });
+              
+              const nearbyDesignersRes = await api.get('/api/designers', {
                 params: {
                   lat: position.coords.latitude,
                   lng: position.coords.longitude,
                   maxDistance: 50000
                 }
-              })
-            ]);
+              });
+              
+              designerStats.nearby = nearbyDesignersRes.data.length;
+            } catch (geoError) {
+              // Silently fail for geolocation errors
+            }
             
             // Update stats with designer information
             setStats({
               ...baseStats,
-              designers: {
-                total: designersRes.data.length,
-                nearby: nearbyDesignersRes.data.length
-              }
+              designers: designerStats
             });
-          } catch (geoError) {
-            console.error('Geolocation error:', geoError);
-            // Still fetch all designers even if geolocation fails
-            try {
-              const designersRes = await api.get('/api/designers');
-              setStats({
-                ...baseStats,
-                designers: {
-                  total: designersRes.data.length,
-                  nearby: 0
-                }
-              });
-            } catch (designerError) {
-              console.error('Error fetching designers:', designerError);
-            }
+          } catch (designerError) {
+            console.error('Error fetching designers:', designerError);
           }
         }
       } catch (error) {

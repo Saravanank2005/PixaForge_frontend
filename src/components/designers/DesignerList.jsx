@@ -1,9 +1,59 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../../utils/api';
+import DesignerMapComponent from './DesignerMapComponent';
+
+// Fallback component when map has errors
+const MapFallback = ({ position, designers, radiusKm }) => {
+  return (
+    <div className="flex flex-col items-center justify-center h-full bg-gray-50 rounded-xl p-8">
+      <div className="text-xl font-semibold text-gray-700 mb-4">Map currently unavailable</div>
+      <p className="text-gray-600 text-center mb-4">
+        We're experiencing some technical difficulties with the map display.
+        <br />You can still view and interact with designers in the list below.
+      </p>
+      <div className="bg-sky-100 p-4 rounded-lg text-sky-800 text-sm">
+        <strong>Your location:</strong> {position ? `${position[0].toFixed(4)}, ${position[1].toFixed(4)}` : 'Unknown'}
+        <br />
+        <strong>Designers nearby:</strong> {designers.length}
+        <br />
+        <strong>Search radius:</strong> {radiusKm} km
+      </div>
+    </div>
+  );
+};
+
+// Map component with error boundary to handle potential issues
+const DesignerMap = ({ position, designers, radiusKm }) => {
+  const [hasError, setHasError] = useState(false);
+  
+  // Reset error state when props change
+  useEffect(() => {
+    setHasError(false);
+  }, [position, designers, radiusKm]);
+  
+  if (hasError || !position) {
+    return <MapFallback position={position} designers={designers} radiusKm={radiusKm} />;
+  }
+  
+  try {
+    return (
+      <div className="h-full" style={{ position: 'relative' }}>
+        <DesignerMapComponent
+          position={position}
+          designers={designers}
+          radiusKm={radiusKm}
+        />
+      </div>
+    );
+  } catch (error) {
+    console.error('Error rendering map:', error);
+    setHasError(true);
+    return <MapFallback position={position} designers={designers} radiusKm={radiusKm} />;
+  }
+};
 
 const AVAILABLE_SKILLS = [
   { name: 'Logo Design', defaultRate: 500 },
@@ -28,10 +78,21 @@ const DesignerList = () => {
   const [maxRates, setMaxRates] = useState({});
   const [radiusKm, setRadiusKm] = useState(10); // Default 10km radius
 
-  // Custom marker icons
+  // Initialize map icons
+  // Fix Leaflet's default icon path issues
+  useEffect(() => {
+    // Fix Leaflet's default icon path issues
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+    });
+  }, []);
+
   const userIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -40,7 +101,7 @@ const DesignerList = () => {
 
   const designerIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -319,64 +380,21 @@ const DesignerList = () => {
                   <div className="text-red-600 text-xl font-medium">{error}</div>
                 </div>
               ) : (
-                <MapContainer
-                  center={position || [0, 0]}
-                  zoom={13}
-                  style={{ height: '100%', width: '100%' }}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  
-                  {/* User Marker */}
-                  {position && (
-                    <Marker position={position} icon={userIcon}>
-                      <Popup>You are here</Popup>
-                    </Marker>
+                <div className="h-full">
+                  {position ? (
+                    <DesignerMap
+                      position={position}
+                      designers={designers}
+                      userIcon={userIcon}
+                      designerIcon={designerIcon}
+                      radiusKm={radiusKm}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-gray-600 text-xl font-medium">Please allow location access to view the map</div>
+                    </div>
                   )}
-
-                  {/* Designer Markers */}
-                  {designers.map((designer, designerIndex) => {
-                    const hasValidLocation = designer.location && 
-                      typeof designer.location.coordinates === 'object' &&
-                      Array.isArray(designer.location.coordinates) &&
-                      designer.location.coordinates.length === 2;
-
-                    if (!hasValidLocation) return null;
-
-                    const position = [
-                      designer.location.coordinates[1], // latitude
-                      designer.location.coordinates[0]  // longitude
-                    ];
-                    
-                    // Skip designers outside the radius if we have distance data
-                    if (designer.distance && designer.distance > radiusKm) {
-                      return null;
-                    }
-
-                    return (
-                      <Marker
-                        key={`designer-${designer._id}-${designerIndex}`}
-                        position={position}
-                        icon={designerIcon}
-                      >
-                        <Popup>
-                          <div className="p-4">
-                            <h3 className="font-semibold text-gray-900 text-lg">{designer.username}</h3>
-                            <p className="text-sm text-gray-600 line-clamp-2 mt-1">{designer.bio}</p>
-                            <Link
-                              to={`/app/designers/${designer._id}`}
-                              className="mt-3 inline-block text-sky-500 hover:text-sky-600 font-medium transition-colors duration-200"
-                            >
-                              View Profile
-                            </Link>
-                          </div>
-                        </Popup>
-                      </Marker>
-                    );
-                  })}
-                </MapContainer>
+                </div>
               )}
             </div>
 

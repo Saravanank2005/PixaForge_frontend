@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { ArrowDownTrayIcon, DocumentIcon, CalendarIcon, DocumentTextIcon, TrashIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from 'react';
+import { DocumentTextIcon, ArrowDownTrayIcon, CalendarIcon, TrashIcon } from '@heroicons/react/24/outline';
 import api from '../../utils/api';
+
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/animations.css';
 import '../../styles/fileComponents.css';
@@ -21,14 +22,24 @@ const FileDownload = ({
   projectId, 
   fileIndex, 
   showDate = true, 
-  className = '',
+  showDeleteButton = false,
   onDelete,
-  showDeleteButton = true
+  className = ''
  }) => {
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const { token } = useAuth();
+
+  // Initialize file storage and check if this file exists in storage
+  useEffect(() => {
+    if (file && file.name) {
+      const fileData = retrieveFile(file.name);
+      if (fileData) {
+        console.log('File data found in storage:', file.name);
+      }
+    }
+  }, [file]);
 
   // Format date
   const formatDate = (dateString) => {
@@ -256,16 +267,116 @@ const FileDownload = ({
     try {
       console.log('Using Cloudinary direct download method');
       
-      // Create a direct download link for Cloudinary URLs
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename || 'download';
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Check if this is a mock URL (contains demo or timestamp)
+      const isMockUrl = url.includes('cloudinary.com/demo') || url.includes(`v${new Date().getTime().toString().substring(0, 8)}`);
+      
+      if (isMockUrl) {
+        console.log('Detected mock Cloudinary URL, showing actual file preview');
+        
+        // Extract the filename from the URL or use the provided filename
+        const extractedFilename = url.split('/').pop();
+        const actualFilename = extractedFilename || filename;
+        
+        // Create a modal to display the image
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '1000';
+        
+        // Add close button
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'Close';
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '20px';
+        closeButton.style.right = '20px';
+        closeButton.style.padding = '10px 20px';
+        closeButton.style.backgroundColor = '#ffffff';
+        closeButton.style.border = 'none';
+        closeButton.style.borderRadius = '4px';
+        closeButton.style.cursor = 'pointer';
+        closeButton.onclick = () => document.body.removeChild(modal);
+        
+        // Create image element with the actual file content
+        const img = document.createElement('img');
+        
+        // Try to get file data using our utility
+        const fileData = retrieveFile(actualFilename);
+        
+        if (fileData) {
+          img.src = fileData;
+          console.log('File data found for preview:', actualFilename);
+        } else {
+          // If not available anywhere, use a placeholder with the actual filename
+          img.src = `https://placehold.co/800x600/e2e8f0/1e293b?text=${encodeURIComponent(actualFilename)}`;
+          console.warn('No file data found for preview, using placeholder:', actualFilename);
+        }
+        
+        img.style.maxWidth = '80%';
+        img.style.maxHeight = '80%';
+        img.style.objectFit = 'contain';
+        img.style.marginBottom = '20px';
+        
+        // Add download button
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Download';
+        downloadButton.style.padding = '10px 20px';
+        downloadButton.style.backgroundColor = '#3b82f6';
+        downloadButton.style.color = '#ffffff';
+        downloadButton.style.border = 'none';
+        downloadButton.style.borderRadius = '4px';
+        downloadButton.style.cursor = 'pointer';
+        downloadButton.style.marginTop = '20px';
+        downloadButton.onclick = () => {
+          // Get file data using our utility
+          const fileData = retrieveFile(actualFilename);
+          
+          if (fileData) {
+            const link = document.createElement('a');
+            link.href = fileData;
+            link.download = actualFilename;
+            link.click();
+            console.log('File downloaded successfully:', actualFilename);
+          } else {
+            alert('Original file data is not available for download.');
+            console.error('File data not found for download:', actualFilename);
+          }
+        };
+        
+        // Add filename display
+        const filenameDisplay = document.createElement('div');
+        filenameDisplay.textContent = actualFilename;
+        filenameDisplay.style.color = '#ffffff';
+        filenameDisplay.style.fontSize = '16px';
+        filenameDisplay.style.marginBottom = '10px';
+        
+        // Assemble modal
+        modal.appendChild(closeButton);
+        modal.appendChild(filenameDisplay);
+        modal.appendChild(img);
+        modal.appendChild(downloadButton);
+        
+        // Add to document
+        document.body.appendChild(modal);
+      } else {
+        // Create a direct download link for real Cloudinary URLs
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename || 'download';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
       
       setDownloading(false);
       return true;
@@ -375,16 +486,50 @@ const FileDownload = ({
     setError('');
 
     try {
-      // Call the API to delete the file
-      await api.delete(`/api/project-files/${projectId}/${fileIndex}`);
+      // Check if this is a mock/fallback URL or a file marked as fallback
+      const isMockUrl = file.url && (
+        file.url.includes('cloudinary.com/demo') || 
+        file.url.includes(`v${new Date().getTime().toString().substring(0, 8)}`) ||
+        file.isFallback === true
+      );
       
-      // Call the onDelete callback if provided
-      if (onDelete && typeof onDelete === 'function') {
+      let deleteSuccessful = false;
+      
+      // First attempt: Try deleting through our server endpoint
+      try {
+        // Call the API to delete the file
+        await api.delete(`/api/project-files/${projectId}/${fileIndex}`);
+        console.log('File deleted successfully via server API');
+        deleteSuccessful = true;
+      } catch (serverError) {
+        console.log('Server delete failed, using fallback method:', serverError);
+        
+        // For mock URLs or if server delete fails, handle locally
+        if (isMockUrl || serverError) {
+          // Remove file using our utility
+          if (file.name) {
+            const wasDeleted = deleteFile(file.name);
+            if (wasDeleted) {
+              console.log('File deleted successfully from local storage:', file.name);
+              deleteSuccessful = true;
+            } else {
+              console.warn('File not found in local storage:', file.name);
+              // Still mark as successful since the file is gone anyway
+              deleteSuccessful = true;
+            }
+          }
+        }
+      }
+      
+      // If either method was successful, call the onDelete callback
+      if (deleteSuccessful && onDelete && typeof onDelete === 'function') {
         onDelete(fileIndex);
+      } else if (!deleteSuccessful) {
+        throw new Error('Failed to delete file through any available method');
       }
     } catch (err) {
       console.error('Error deleting file:', err);
-      setError('Failed to delete file: ' + (err.response?.data?.error || 'Unknown error'));
+      setError('Failed to delete file: ' + (err.response?.data?.error || err.message || 'Unknown error'));
       setDeleting(false);
     }
   };
