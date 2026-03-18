@@ -7,6 +7,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ChatMessage from './ChatMessage';
 import UserAvatar from '../common/UserAvatar';
 
+const normalizeMessage = (msg) => {
+  if (!msg) return null;
+  const source = msg.message && typeof msg.message === 'object' ? msg.message : msg;
+  return {
+    ...source,
+    senderId: source.senderId || source.sender || null,
+    receiverId: source.receiverId || source.recipient || null,
+    content: source.content || '',
+    createdAt: source.createdAt || new Date().toISOString()
+  };
+};
+
 const ConversationFixed = () => {
   const params = useParams();
   const { userId } = params;
@@ -43,19 +55,12 @@ const ConversationFixed = () => {
     // Fetch other user's details
     const fetchUserData = async () => {
       try {
-        const response = await api.get(`/api/user/${userId}`);
+        const response = await api.get(`/api/auth/user/${userId}`);
         setOtherUser(response.data);
       } catch (error) {
         console.error('Error fetching user data:', error);
-        if (error.response && error.response.status === 404) {
-          setError('User not found. They may have deleted their account.');
-        } else if (error.response && error.response.status === 403) {
-          setError('You do not have permission to view this conversation.');
-        } else if (error.message === 'Network Error') {
-          setError('Network error. Please check your internet connection.');
-        } else {
-          setError('Failed to load user information. Please try again later.');
-        }
+        // Don't hard-fail chat if header user fetch fails.
+        setOtherUser({ _id: userId, username: 'User' });
       }
     };
     
@@ -64,7 +69,10 @@ const ConversationFixed = () => {
       try {
         setLoading(true);
         const response = await api.get(`/api/messages/conversation/${userId}`);
-        setMessages(response.data);
+        const normalized = Array.isArray(response.data)
+          ? response.data.map(normalizeMessage).filter(Boolean)
+          : [];
+        setMessages(normalized);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -111,8 +119,11 @@ const ConversationFixed = () => {
     
     // Listen for incoming messages
     socket.on('receiveMessage', (message) => {
-      if (message.sender === userId || message.recipient === userId) {
-        setMessages(prevMessages => [...prevMessages, message]);
+      const normalized = normalizeMessage(message);
+      if (!normalized) return;
+
+      if (normalized.senderId === userId || normalized.receiverId === userId) {
+        setMessages(prevMessages => [...prevMessages, normalized]);
       }
     });
     
@@ -195,9 +206,12 @@ const ConversationFixed = () => {
       };
       
       const response = await api.post('/api/messages', messageData);
+      const createdMessage = normalizeMessage(response?.data);
       
       // Add the new message to the conversation
-      setMessages(prevMessages => [...prevMessages, response.data]);
+      if (createdMessage) {
+        setMessages(prevMessages => [...prevMessages, createdMessage]);
+      }
       
       // Clear the input field
       setNewMessage('');
@@ -255,7 +269,7 @@ const ConversationFixed = () => {
   const groupMessagesByDate = () => {
     const groups = {};
     
-    messages.forEach(message => {
+    messages.forEach((message) => {
       const date = new Date(message.createdAt).toDateString();
       if (!groups[date]) {
         groups[date] = [];
@@ -406,7 +420,7 @@ const ConversationFixed = () => {
               </div>
               
               {group.messages.map((message, messageIndex) => {
-                const isCurrentUser = message.sender === currentUser?._id;
+                const isCurrentUser = (message.senderId || message.sender) === currentUser?._id;
                 
                 return (
                   <ChatMessage
@@ -503,4 +517,3 @@ const ConversationFixed = () => {
 };
 
 export default ConversationFixed;
-9

@@ -71,7 +71,7 @@ const Login = () => {
               Welcome Back
             </h2>
             <p className="auth-subtitle mt-2 text-center text-sm">
-              Sign in to access your PixaForge account
+              Sign in to access your BidLance account
             </p>
             <div className="auth-inline-points">
               <span>Fast login</span>

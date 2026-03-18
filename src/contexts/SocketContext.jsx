@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }) => {
     
     if (isAuthenticated && token) {
       // Create socket instance
-      socketInstance = io(import.meta.env.VITE_API_URL || 'https://pixaforge-backend.onrender.com', {
+      socketInstance = io(import.meta.env.VITE_API_URL || 'https://bidlance-backend.onrender.com', {
         transports: ['websocket'],
         autoConnect: false
       });

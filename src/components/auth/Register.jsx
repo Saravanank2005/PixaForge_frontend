@@ -155,7 +155,7 @@ const Register = () => {
               Create Your Account
             </h2>
             <p className="auth-subtitle mt-1 text-center text-sm">
-              Join PixaForge and start your journey
+              Join BidLance and start your journey
             </p>
           </div>
           

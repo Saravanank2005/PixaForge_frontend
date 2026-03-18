@@ -188,7 +188,7 @@ const LandingPage = () => {
         <div className="lpx-nav-inner">
           <button className="lpx-brand" onClick={() => scrollToSection('home')} type="button">
             <span className="lpx-brand-dot" />
-            <span className="lpx-brand-text">PixaForge</span>
+            <span className="lpx-brand-text">BidLance</span>
           </button>
 
           <nav className="lpx-links" aria-label="Landing sections">
@@ -232,7 +232,7 @@ const LandingPage = () => {
             <span className="lpx-badge">Design Sourcing, Rebuilt</span>
             <h1>Build design projects with speed, clarity, and better talent matches.</h1>
             <p>
-              PixaForge connects clients and designers through location intelligence, structured collaboration,
+              BidLance connects clients and designers through location intelligence, structured collaboration,
               and project-first communication that actually scales.
             </p>
 
@@ -459,7 +459,7 @@ const LandingPage = () => {
         <div className="lpx-container">
           <div className="lpx-section-head">
             <h2>Trusted by teams and independent creators</h2>
-            <p>People choose PixaForge for quality matching and a cleaner collaboration model.</p>
+            <p>People choose BidLance for quality matching and a cleaner collaboration model.</p>
           </div>
 
           <div className="lpx-testimonial-grid">
@@ -518,7 +518,7 @@ const LandingPage = () => {
       <footer className="lpx-footer">
         <div className="lpx-container lpx-footer-inner">
           <div>
-            <h3>PixaForge</h3>
+            <h3>BidLance</h3>
             <p>Design collaboration platform for modern client-designer workflows.</p>
           </div>
           <div className="lpx-footer-nav">
@@ -527,7 +527,7 @@ const LandingPage = () => {
             <a href="#workflow" onClick={(e) => { e.preventDefault(); scrollToSection('workflow'); }}>Workflow</a>
             <a href="#cta" onClick={(e) => { e.preventDefault(); scrollToSection('cta'); }}>Start</a>
           </div>
-          <div className="lpx-copy">© {new Date().getFullYear()} PixaForge. All rights reserved.</div>
+          <div className="lpx-copy">© {new Date().getFullYear()} BidLance. All rights reserved.</div>
         </div>
       </footer>
     </div>

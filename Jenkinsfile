@@ -12,7 +12,7 @@ pipeline {
         stage('1. Clone Repository') {
             steps {
                 // Clones your project from GitHub
-                git branch: 'main', url: 'https://github.com/Saravanank2005/PixaForge_frontend.git'
+                git branch: 'main', url: 'https://github.com/Saravanank2005/BidLance_frontend.git'
             }
         }
 

@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": "https://pixaforge-backend.onrender.com",
+      "/api": "https://bidlance-backend.onrender.com",
     },
   },
 });

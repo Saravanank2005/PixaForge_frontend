@@ -187,7 +187,7 @@ const Sidebar = ({ open, toggleSidebar }) => {
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
             <Squares2X2Icon className="h-8 w-8 text-primary-600" />
-            <h1>PixaForge</h1>
+            <h1>BidLance</h1>
           </div>
           <button 
             className="sidebar-toggle md:flex hidden"
