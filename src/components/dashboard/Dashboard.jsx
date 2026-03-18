@@ -4,6 +4,7 @@ import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { formatDate } from '../../utils/formatters';
+import UserAvatar from '../common/UserAvatar';
 
 const Dashboard = () => {
   const { currentUser, isClient, isDesigner } = useAuth();
@@ -224,6 +225,12 @@ const Dashboard = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recentProjects.map((project, index) => (
+                (() => {
+                  const counterparty = isClient
+                    ? getProjectUser(project, 'designer')
+                    : getProjectUser(project, 'client');
+
+                  return (
                 <Link 
                   key={project?._id || index} 
                   to={`/app/projects/${project?._id}`}
@@ -242,23 +249,19 @@ const Dashboard = () => {
                     <p className="text-gray-600 mb-4 line-clamp-2">{project?.description || 'No description available'}</p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className="avatar mr-2">
-                          {isClient ? 
-                            (project.designer?.username?.charAt(0) || 'D') : 
-                            (project.client?.username?.charAt(0) || 'C')}
-                        </div>
+                        <UserAvatar user={counterparty.user || { username: counterparty.label }} sizeClass="w-10 h-10" className="mr-2 shadow-sm flex-shrink-0" textClass="text-sm font-semibold" />
                         <span className="text-sm">
-                          {isClient ? 
-                            (project.designer?.username || 'No designer yet') : 
-                            (project.client?.username || 'Unknown client')}
+                          {counterparty.label}
                         </span>
                       </div>
                       <div className="text-sm text-gray-500">
-                        ${project?.budget || '0'}
+                        ₹{project?.budget || '0'}
                       </div>
                     </div>
                   </div>
                 </Link>
+                  );
+                })()
               ))}
             </div>
           )}
@@ -300,6 +303,17 @@ const getStatusBadgeClass = (status) => {
   };
   
   return classes[status] || 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+};
+
+const getProjectUser = (project, role) => {
+  const source = role === 'designer'
+    ? [project?.designer, project?.designerId]
+    : [project?.client, project?.clientId];
+
+  const user = source.find((item) => item && typeof item === 'object') || null;
+  const label = user?.name || user?.username || user?.fullName || (role === 'designer' ? 'No designer yet' : 'Client');
+
+  return { user, label };
 };
 
 // Helper function to get message partner info (id, name, initial)

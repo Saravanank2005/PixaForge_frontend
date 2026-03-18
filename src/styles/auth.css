@@ -50,8 +50,16 @@
   overflow: hidden;
   position: relative;
   width: 100%;
-  max-width: 550px;
+  max-width: 620px;
   margin: 0 auto;
+}
+
+.auth-card.auth-wide {
+  max-width: 720px;
+}
+
+.auth-card.auth-register-card {
+  max-width: 700px;
 }
 
 .auth-card::before {
@@ -122,17 +130,52 @@
 
 /* Form elements */
 .auth-form {
-  padding: 2rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .auth-form-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-title {
+  color: #0f172a;
+}
+
+.auth-subtitle {
+  color: #64748b;
+}
+
+.auth-inline-link {
+  color: #0284c7;
+}
+
+.auth-inline-link:hover {
+  color: #0369a1;
 }
 
 .auth-form-fields {
   display: grid;
   gap: 1.25rem;
+}
+
+.auth-register-wide .auth-form-fields {
+  grid-template-columns: 1fr;
+  column-gap: 1rem;
+  row-gap: 0.9rem;
+}
+
+.auth-register-wide .auth-form-field,
+.auth-register-wide .auth-location-section {
+  min-width: 0;
+}
+
+.auth-register-wide .auth-form-field.full-span,
+.auth-register-wide .auth-location-section,
+.auth-register-wide .auth-button,
+.auth-register-wide .auth-divider,
+.auth-register-wide .auth-back-link {
+  grid-column: 1 / -1;
 }
 
 .auth-form-field {
@@ -471,11 +514,94 @@
 
 /* Scrollable section for register form */
 .auth-scrollable-section {
-  max-height: 70vh;
+  max-height: 64vh;
   overflow-y: auto;
   padding-right: 0.5rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+.auth-register-wide .auth-scrollable-section {
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+}
+
+/* Premium compact pass for register page */
+.auth-register-refined {
+  padding: 1.1rem 1.3rem 1.25rem;
+}
+
+.auth-register-refined .auth-form-header {
+  margin-bottom: 1rem;
+}
+
+.auth-register-refined .auth-logo {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.85rem;
+}
+
+.auth-register-refined .auth-title {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.auth-register-refined .auth-subtitle {
+  font-size: 0.92rem;
+}
+
+.auth-register-refined .auth-user-type {
+  margin-bottom: 1rem;
+}
+
+.auth-register-refined .auth-form-fields {
+  gap: 0.8rem;
+}
+
+.auth-register-refined .auth-label {
+  font-size: 0.82rem;
+  margin-bottom: 0.25rem;
+}
+
+.auth-register-refined .auth-input,
+.auth-register-refined .auth-button,
+.auth-register-refined .auth-button-secondary {
+  height: 2.4rem;
+}
+
+.auth-register-refined .auth-input {
+  border-radius: 10px;
+  font-size: 0.86rem;
+}
+
+.auth-register-refined .auth-location-section {
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(14, 165, 233, 0.15);
+}
+
+.auth-register-refined .auth-divider {
+  margin: 1.1rem 0;
+}
+
+.auth-register-refined .auth-back-link {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .auth-card.auth-register-card {
+    max-width: 100%;
+  }
+
+  .auth-register-refined {
+    padding: 1rem;
+  }
+
+  .auth-register-refined .auth-title {
+    font-size: 1.45rem;
+  }
 }
 
 .auth-scrollable-section::-webkit-scrollbar {
@@ -489,6 +615,43 @@
 .auth-scrollable-section::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 0.375rem;
+}
+
+.dark-mode .auth-card {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(51, 65, 85, 0.9);
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+}
+
+.dark-mode .auth-input,
+.dark-mode .auth-user-type,
+.dark-mode .auth-user-type-option.active,
+.dark-mode .auth-button-secondary {
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  border-color: rgba(71, 85, 105, 0.8);
+}
+
+.dark-mode .auth-label,
+.dark-mode .auth-divider-text,
+.dark-mode .auth-back-link,
+.dark-mode .auth-form-header p,
+.dark-mode .auth-subtitle,
+.dark-mode .auth-location-header {
+  color: #cbd5e1;
+}
+
+.dark-mode .auth-form-header h2,
+.dark-mode .auth-title {
+  color: #f8fafc;
+}
+
+.dark-mode .auth-inline-link {
+  color: #7dd3fc;
+}
+
+.dark-mode .auth-inline-link:hover {
+  color: #bae6fd;
 }
 
 /* Back link */
@@ -509,4 +672,10 @@
 
 .auth-back-link svg {
   margin-right: 0.375rem;
+}
+
+@media (max-width: 640px) {
+  .auth-register-wide .auth-form-fields {
+    grid-template-columns: 1fr;
+  }
 }

@@ -4,33 +4,63 @@ import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ProjectList = () => {
-  const { isClient } = useAuth();
+  const { isClient, isDesigner, currentUser } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [designerView, setDesignerView] = useState('assigned');
+  const [retryCount, setRetryCount] = useState(0);
+
+  const isTimeoutError = (requestError) => {
+    if (!requestError) return false;
+    if (requestError.code === 'ECONNABORTED') return true;
+    const message = typeof requestError.message === 'string' ? requestError.message.toLowerCase() : '';
+    return message.includes('timeout');
+  };
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get('/api/projects', { timeout: 15000 });
+      setProjects(response.data);
+    } catch (requestError) {
+      console.error('Error fetching projects:', requestError);
+      if (isTimeoutError(requestError)) {
+        setError('Request timed out while loading projects. Please retry in a moment.');
+      } else {
+        setError('Failed to fetch projects. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get('/api/projects');
-        setProjects(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-        setError('Failed to fetch projects. Please try again.');
-        setLoading(false);
-      }
-    };
-    
     fetchProjects();
-  }, []);
+  }, [retryCount]);
   
+  const assignedProjects = projects.filter((project) => {
+    const assignedDesignerId = project.designerId?._id || project.designerId;
+    if (!assignedDesignerId || !currentUser?._id) return false;
+    return String(assignedDesignerId) === String(currentUser._id);
+  });
+
+  const openBidProjects = projects.filter((project) => (
+    project.projectType === 'bidding' &&
+    project.status === 'pending' &&
+    !project.designerId
+  ));
+
+  const baseProjects = isDesigner
+    ? (designerView === 'open-bids' ? openBidProjects : designerView === 'all' ? projects : assignedProjects)
+    : projects;
+
   // Filter projects based on status
   const filteredProjects = statusFilter === 'all'
-    ? projects
-    : projects.filter(project => project.status === statusFilter);
+    ? baseProjects
+    : baseProjects.filter(project => project.status === statusFilter);
   
   // Get status badge color
   const getStatusBadgeClass = (status) => {
@@ -74,6 +104,47 @@ const ProjectList = () => {
           </Link>
         )}
       </div>
+
+      {isDesigner && (
+        <div className="bg-white rounded-lg shadow p-4 mb-6">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium text-gray-700 mr-2">View:</span>
+            <button
+              onClick={() => setDesignerView('assigned')}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                designerView === 'assigned'
+                  ? 'bg-primary-100 text-primary-800'
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
+              Assigned Projects ({assignedProjects.length})
+            </button>
+            <button
+              onClick={() => {
+                setDesignerView('open-bids');
+                setStatusFilter('all');
+              }}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                designerView === 'open-bids'
+                  ? 'bg-cyan-100 text-cyan-800'
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
+              Open Bids ({openBidProjects.length})
+            </button>
+            <button
+              onClick={() => setDesignerView('all')}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                designerView === 'all'
+                  ? 'bg-indigo-100 text-indigo-800'
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
+              All Visible ({projects.length})
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Status Filter */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
@@ -102,6 +173,7 @@ const ProjectList = () => {
             </button>
             <button
               onClick={() => setStatusFilter('accepted')}
+              disabled={isDesigner && designerView === 'open-bids'}
               className={`px-3 py-1 rounded-full text-sm font-medium ${
                 statusFilter === 'accepted'
                   ? 'bg-purple-100 text-purple-800'
@@ -112,6 +184,7 @@ const ProjectList = () => {
             </button>
             <button
               onClick={() => setStatusFilter('in_progress')}
+              disabled={isDesigner && designerView === 'open-bids'}
               className={`px-3 py-1 rounded-full text-sm font-medium ${
                 statusFilter === 'in_progress'
                   ? 'bg-blue-100 text-blue-800'
@@ -122,6 +195,7 @@ const ProjectList = () => {
             </button>
             <button
               onClick={() => setStatusFilter('completed')}
+              disabled={isDesigner && designerView === 'open-bids'}
               className={`px-3 py-1 rounded-full text-sm font-medium ${
                 statusFilter === 'completed'
                   ? 'bg-green-100 text-green-800'
@@ -132,6 +206,7 @@ const ProjectList = () => {
             </button>
             <button
               onClick={() => setStatusFilter('cancelled')}
+              disabled={isDesigner && designerView === 'open-bids'}
               className={`px-3 py-1 rounded-full text-sm font-medium ${
                 statusFilter === 'cancelled'
                   ? 'bg-red-100 text-red-800'
@@ -142,6 +217,9 @@ const ProjectList = () => {
             </button>
           </div>
         </div>
+        {isDesigner && designerView === 'open-bids' && (
+          <p className="text-xs text-gray-500 mt-3">Open bidding projects are always in pending status.</p>
+        )}
       </div>
       
       {/* Projects List */}
@@ -153,6 +231,12 @@ const ProjectList = () => {
       ) : error ? (
         <div className="bg-white rounded-lg shadow p-6 text-center">
           <p className="text-red-500">{error}</p>
+          <button
+            onClick={() => setRetryCount((count) => count + 1)}
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            Retry
+          </button>
         </div>
       ) : filteredProjects.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-6 text-center">
@@ -183,9 +267,14 @@ const ProjectList = () => {
                   <h2 className="text-xl font-semibold text-gray-900 mb-1 truncate">
                     {project.title}
                   </h2>
-                  <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(project.status)}`}>
-                    {project.status.replace('_', ' ')}
-                  </span>
+                  <div className="flex gap-2 ml-2 flex-wrap justify-end">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(project.status)}`}>
+                      {project.status.replace('_', ' ')}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${project.projectType === 'bidding' ? 'bg-cyan-100 text-cyan-800' : 'bg-indigo-100 text-indigo-800'}`}>
+                      {project.projectType === 'bidding' ? 'bidding' : 'direct'}
+                    </span>
+                  </div>
                 </div>
                 
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -197,6 +286,11 @@ const ProjectList = () => {
                     <p className="text-sm text-gray-500">
                       Budget: <span className="font-semibold text-gray-900">₹{project.budget}</span>
                     </p>
+                    {project.projectType === 'bidding' && (
+                      <p className="text-sm text-gray-500">
+                        Bids: <span className="font-semibold text-gray-900">{project.bids?.length || 0}</span>
+                      </p>
+                    )}
                     {project.deadline && (
                       <p className="text-sm text-gray-500">
                         Deadline: <span className="font-semibold text-gray-900">
@@ -209,13 +303,13 @@ const ProjectList = () => {
                   <div className="flex items-center">
                     <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-medium">
                       {isClient 
-                        ? project.designerId?.username?.charAt(0).toUpperCase() || 'D'
+                        ? project.designerId?.username?.charAt(0).toUpperCase() || 'B'
                         : project.clientId?.username?.charAt(0).toUpperCase() || 'C'
                       }
                     </div>
                     <span className="ml-2 text-sm text-gray-700 truncate max-w-[100px]">
                       {isClient 
-                        ? project.designerId?.username || 'Designer'
+                        ? project.designerId?.username || (project.projectType === 'bidding' ? 'Open Bids' : 'Designer')
                         : project.clientId?.username || 'Client'
                       }
                     </span>

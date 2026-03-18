@@ -290,51 +290,96 @@ a:hover {
   background-color: var(--border-dark);
 }
 
-/* Dark mode text overrides for better visibility */
-.dark-mode h1, 
-.dark-mode h2, 
-.dark-mode h3, 
-.dark-mode h4, 
-.dark-mode h5, 
-.dark-mode h6 {
+/* Theme consistency + utility coverage */
+.light-mode body {
+  background-color: var(--bg-main);
   color: var(--text-primary);
 }
 
-.dark-mode p, 
-.dark-mode span, 
-.dark-mode div {
-  color: var(--text-secondary);
+.dark-mode body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
 }
 
-.dark-mode .text-gray-800 {
-  color: var(--text-primary) !important;
+.dark-mode .bg-white {
+  background-color: var(--bg-card) !important;
 }
 
+.dark-mode .bg-white\/95,
+.dark-mode .bg-white\/90,
+.dark-mode .bg-white\/80,
+.dark-mode .bg-white\/70,
+.dark-mode .bg-white\/60,
+.dark-mode .bg-white\/50 {
+  background-color: rgba(30, 41, 59, 0.95) !important;
+}
+
+.dark-mode .bg-gray-50,
+.dark-mode .bg-gray-100 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark-mode .hover\:bg-gray-50:hover,
+.dark-mode .hover\:bg-gray-100:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.dark-mode .border-gray-100,
+.dark-mode .border-gray-200,
+.dark-mode .border-gray-300 {
+  border-color: var(--border-light) !important;
+}
+
+.dark-mode .text-gray-900,
+.dark-mode .text-gray-800,
 .dark-mode .text-gray-700 {
   color: var(--text-primary) !important;
 }
 
-.dark-mode .text-gray-600 {
-  color: var(--text-secondary) !important;
-}
-
-.dark-mode .text-gray-500 {
-  color: var(--text-secondary) !important;
-}
-
+.dark-mode .text-gray-600,
+.dark-mode .text-gray-500,
 .dark-mode .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode .shadow,
+.dark-mode .shadow-sm,
+.dark-mode .shadow-md,
+.dark-mode .shadow-lg,
+.dark-mode .shadow-xl {
+  box-shadow: var(--shadow-md) !important;
+}
+
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
   color: var(--text-tertiary) !important;
 }
 
-/* Ensure form labels are visible */
-.dark-mode label {
-  color: var(--text-primary);
+.dark-mode .card,
+.dark-mode .glass {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
 }
 
-/* Make sure card titles are visible */
-.dark-mode .card h2,
-.dark-mode .glass h2,
-.dark-mode .card h3,
-.dark-mode .glass h3 {
-  color: var(--text-primary);
+.dark-mode .auth-background {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+}
+
+/* Ensure headings stay readable without overriding all text globally */
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6,
+.dark-mode label {
+  color: var(--text-primary) !important;
 }

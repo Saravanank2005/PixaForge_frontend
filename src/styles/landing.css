@@ -4,8 +4,8 @@
 :root {
   /* Neon colors */
   --neon-blue: #4dabf7;
-  --neon-purple: #9775fa;
-  --neon-pink: #f783ac;
+  --neon-purple: #38bdf8;
+  --neon-pink: #0ea5e9;
   --neon-green: #63e6be;
   
   /* Dark backgrounds */
@@ -38,10 +38,10 @@
   --primary-500-rgb: 66, 153, 225;
   
   /* Accent colors */
-  --accent-300: #b794f4;
-  --accent-400: #9f7aea;
-  --accent-500: #805ad5;
-  --accent-600: #6b46c1;
+  --accent-300: #7dd3fc;
+  --accent-400: #38bdf8;
+  --accent-500: #0ea5e9;
+  --accent-600: #0284c7;
 }
 
 /* Hero section styling */

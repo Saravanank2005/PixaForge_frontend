@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../../utils/api';
 import DesignerMapComponent from './DesignerMapComponent';
+import UserAvatar from '../common/UserAvatar';
 
 // Fallback component when map has errors
 const MapFallback = ({ position, designers, radiusKm }) => {
@@ -261,7 +262,7 @@ const DesignerList = () => {
           }
         `}
       </style>
-      <div className="container mx-auto px-6 py-16 max-w-7xl">
+      <div className="container mx-auto px-6 py-16 max-w-7xl overflow-x-hidden">
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Find Designers</h1>
           <p className="mt-3 text-lg text-gray-600 leading-relaxed">
@@ -298,12 +299,12 @@ const DesignerList = () => {
                       </label>
                       {selectedSkills.includes(skill.name) && (
                         <div className="ml-8">
-                          <label className="block text-xs text-gray-500 font-medium">Max Rate (USD)</label>
+                          <label className="block text-xs text-gray-500 font-medium">Max Rate (INR)</label>
                           <input
                             type="number"
                             value={maxRates[skill.name] || ''}
                             onChange={(e) => handleMaxRateChange(skill.name, e.target.value)}
-                            placeholder={`Default: $${skill.defaultRate}`}
+                            placeholder={`Default: ₹${skill.defaultRate}`}
                             className="mt-2 block w-full rounded-lg border-gray-200 shadow-sm focus:border-sky-500 focus:ring-sky-500 text-sm py-2 px-3 transition-all duration-300"
                           />
                         </div>
@@ -419,16 +420,22 @@ const DesignerList = () => {
                   No designers found matching your criteria.
                 </div>
               ) : (
-                <div className="divide-y divide-gray-200">
-                  {designers.map((designer, designerIndex) => (
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
+                  {designers.map((designer, designerIndex) => {
+                    const highlightCard = designerIndex % 5 === 0;
+                    return (
                     <div
                       key={`designer-${designer._id}-${designerIndex}`}
-                      className="p-6 bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] designer-card mb-4"
+                      className={`p-6 bg-white border border-gray-100 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px] designer-card h-full ${highlightCard ? 'xl:col-span-2' : ''}`}
                     >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-xl font-bold text-gray-900">{designer.name || designer.username}</h3>
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 h-full">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-2 gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <UserAvatar user={designer} sizeClass="w-11 h-11" className="shadow-sm flex-shrink-0" />
+                              <h3 className="text-xl font-bold text-gray-900 truncate">{designer.name || designer.username}</h3>
+                            </div>
                             <div className="flex items-center">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -451,39 +458,41 @@ const DesignerList = () => {
                           {/* Skills */}
                           {designer.skills && designer.skills.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-2">
-                              {designer.skills.slice(0, 3).map((skill, skillIndex) => (
+                              {designer.skills.slice(0, highlightCard ? 6 : 4).map((skill, skillIndex) => (
                                 <span
                                   key={`skill-${designer._id}-${skill.name}-${skillIndex}`}
                                   className="skill-tag inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sky-100 text-sky-800"
                                 >
-                                  {skill.name} {skill.rate && `- $${skill.rate}/hr`}
+                                  {skill.name} {skill.rate && `- ₹${skill.rate}/hr`}
                                 </span>
                               ))}
-                              {designer.skills.length > 3 && (
-                                <span className="text-xs text-gray-500">+{designer.skills.length - 3} more</span>
+                              {designer.skills.length > (highlightCard ? 6 : 4) && (
+                                <span className="text-xs text-gray-500">+{designer.skills.length - (highlightCard ? 6 : 4)} more</span>
                               )}
                             </div>
                           )}
                           
                           {/* Bio */}
                           {designer.bio && (
-                            <p className="mt-3 text-sm text-gray-600 line-clamp-2">
+                            <p className={`mt-3 text-sm text-gray-600 ${highlightCard ? 'line-clamp-3' : 'line-clamp-2'} break-words`}>
                               {designer.bio}
                             </p>
                           )}
                         </div>
                         
-                        <div className="ml-4 flex-shrink-0">
+                        <div className="sm:ml-4 flex-shrink-0 self-start sm:self-end">
                           <Link
                             to={`/app/designers/${designer._id}`}
-                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300"
+                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300 whitespace-nowrap"
                           >
                             View Profile
                           </Link>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
+                  </div>
                 </div>
               )}
             </div>

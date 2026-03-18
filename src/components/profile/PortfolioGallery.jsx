@@ -89,6 +89,13 @@ const PortfolioGallery = ({
   // Handle download of portfolio item
   const handleDownload = (item) => {
     try {
+      if (!item.imageUrl) {
+        if (onRemove) {
+          onRemove('This portfolio item has no image to download');
+        }
+        return;
+      }
+
       // Create download URL based on whether we have a designerId or not
       const downloadUrl = designerId 
         ? `/api/files/download-portfolio/${designerId}/${item._id}`
@@ -139,7 +146,7 @@ const PortfolioGallery = ({
               className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col h-full border border-gray-100 hover:shadow-md transition-shadow"
             >
               {/* Item image or placeholder */}
-              {item.imageUrl && (
+              {item.imageUrl ? (
                 <div 
                   className="relative h-48 overflow-hidden cursor-pointer group"
                   onClick={() => handleViewItem(item)}
@@ -157,6 +164,10 @@ const PortfolioGallery = ({
                       {item.category}
                     </span>
                   )}
+                </div>
+              ) : (
+                <div className="h-48 flex items-center justify-center bg-gray-50 border-b border-gray-100">
+                  <p className="text-sm text-gray-500 px-4 text-center">No image uploaded. Use links below to view this project.</p>
                 </div>
               )}
               
@@ -207,7 +218,7 @@ const PortfolioGallery = ({
                       </button>
                     )}
                     
-                    {showDownloadButton && (
+                    {showDownloadButton && item.imageUrl && (
                       <button
                         type="button"
                         onClick={() => handleDownload(item)}
@@ -224,6 +235,28 @@ const PortfolioGallery = ({
                         onClick={() => window.open(item.projectUrl.startsWith('http') ? item.projectUrl : `https://${item.projectUrl}`, '_blank', 'noopener,noreferrer')}
                         className="text-blue-600 hover:text-blue-800"
                         title="Visit project"
+                      >
+                        <LinkIcon className="h-4 w-4" />
+                      </button>
+                    )}
+
+                    {item.githubUrl && (
+                      <button
+                        type="button"
+                        onClick={() => window.open(item.githubUrl.startsWith('http') ? item.githubUrl : `https://${item.githubUrl}`, '_blank', 'noopener,noreferrer')}
+                        className="text-gray-700 hover:text-black"
+                        title="Open GitHub repository"
+                      >
+                        <LinkIcon className="h-4 w-4" />
+                      </button>
+                    )}
+
+                    {item.driveUrl && (
+                      <button
+                        type="button"
+                        onClick={() => window.open(item.driveUrl.startsWith('http') ? item.driveUrl : `https://${item.driveUrl}`, '_blank', 'noopener,noreferrer')}
+                        className="text-green-600 hover:text-green-800"
+                        title="Open Google Drive link"
                       >
                         <LinkIcon className="h-4 w-4" />
                       </button>

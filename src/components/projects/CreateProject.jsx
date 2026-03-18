@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
+import UserAvatar from '../common/UserAvatar';
 
 const CreateProject = () => {
   const { isClient } = useAuth();
@@ -15,6 +16,7 @@ const CreateProject = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    projectType: preselectedDesignerId ? 'direct' : 'bidding',
     designerId: preselectedDesignerId || '',
     budget: '',
     deliverables: '',
@@ -62,6 +64,18 @@ const CreateProject = () => {
   
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'projectType') {
+      setFormData({
+        ...formData,
+        projectType: value,
+        designerId: value === 'direct' ? formData.designerId : ''
+      });
+      if (value !== 'direct') {
+        setSelectedDesigner(null);
+      }
+      return;
+    }
+
     setFormData({
       ...formData,
       [name]: value
@@ -78,8 +92,13 @@ const CreateProject = () => {
     e.preventDefault();
     
     // Validate form
-    if (!formData.title || !formData.description || !formData.designerId || !formData.budget) {
+    if (!formData.title || !formData.description || !formData.budget) {
       setError('Please fill in all required fields');
+      return;
+    }
+
+    if (formData.projectType === 'direct' && !formData.designerId) {
+      setError('Please select a designer for direct hire projects');
       return;
     }
     
@@ -89,6 +108,7 @@ const CreateProject = () => {
       
       const response = await api.post('/api/projects', {
         ...formData,
+        designerId: formData.projectType === 'direct' ? formData.designerId : undefined,
         budget: parseFloat(formData.budget),
         deadline: formData.deadline || undefined
       });
@@ -123,6 +143,38 @@ const CreateProject = () => {
             
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hiring Mode *
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label className={`border rounded-md p-3 cursor-pointer ${formData.projectType === 'direct' ? 'border-primary-500 bg-primary-50' : 'border-gray-300'}`}>
+                    <input
+                      type="radio"
+                      name="projectType"
+                      value="direct"
+                      checked={formData.projectType === 'direct'}
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <span className="font-medium text-gray-900">Direct Hire</span>
+                    <p className="text-xs text-gray-600 mt-1">Invite one designer directly (existing flow).</p>
+                  </label>
+                  <label className={`border rounded-md p-3 cursor-pointer ${formData.projectType === 'bidding' ? 'border-primary-500 bg-primary-50' : 'border-gray-300'}`}>
+                    <input
+                      type="radio"
+                      name="projectType"
+                      value="bidding"
+                      checked={formData.projectType === 'bidding'}
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <span className="font-medium text-gray-900">Open Bidding</span>
+                    <p className="text-xs text-gray-600 mt-1">Designers place bids, you select the best one.</p>
+                  </label>
+                </div>
+              </div>
+
+              <div className="mb-4">
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                   Project Title *
                 </label>
@@ -154,41 +206,43 @@ const CreateProject = () => {
                 ></textarea>
               </div>
               
-              <div className="mb-4">
-                <label htmlFor="designerId" className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Designer *
-                </label>
-                {designersLoading ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary-600 mr-2"></div>
-                    <span className="text-sm text-gray-500">Loading designers...</span>
-                  </div>
-                ) : designers.length === 0 ? (
-                  <p className="text-sm text-gray-500">
-                    No designers available. <Link to="/app/designers" className="text-primary-600 hover:text-primary-800">Browse designers</Link>
-                  </p>
-                ) : (
-                  <select
-                    id="designerId"
-                    name="designerId"
-                    value={formData.designerId}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                    required
-                  >
-                    <option value="">Select a designer</option>
-                    {designers.map(designer => (
-                      <option key={designer._id} value={designer._id}>
-                        {designer.username} {designer.hourlyRate ? `($${designer.hourlyRate}/hr)` : ''}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
+              {formData.projectType === 'direct' && (
+                <div className="mb-4">
+                  <label htmlFor="designerId" className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Designer *
+                  </label>
+                  {designersLoading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary-600 mr-2"></div>
+                      <span className="text-sm text-gray-500">Loading designers...</span>
+                    </div>
+                  ) : designers.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      No designers available. <Link to="/app/designers" className="text-primary-600 hover:text-primary-800">Browse designers</Link>
+                    </p>
+                  ) : (
+                    <select
+                      id="designerId"
+                      name="designerId"
+                      value={formData.designerId}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    >
+                      <option value="">Select a designer</option>
+                      {designers.map(designer => (
+                        <option key={designer._id} value={designer._id}>
+                          {designer.username} {designer.hourlyRate ? `(₹${designer.hourlyRate}/hr)` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
               
               <div className="mb-4">
                 <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
-                  Budget (USD) *
+                  Budget (INR) *
                 </label>
                 <input
                   type="number"
@@ -255,16 +309,14 @@ const CreateProject = () => {
         
         {/* Designer Preview */}
         <div className="lg:col-span-1">
-          {selectedDesigner ? (
+          {formData.projectType === 'direct' && selectedDesigner ? (
             <div className="bg-white rounded-lg shadow overflow-hidden sticky top-20">
               <div className="p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Selected Designer</h2>
                 
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium">
-                      {selectedDesigner.username.charAt(0).toUpperCase()}
-                    </div>
+                    <UserAvatar user={selectedDesigner} sizeClass="w-12 h-12" className="shadow-sm" />
                   </div>
                   
                   <div className="ml-3">
@@ -284,7 +336,7 @@ const CreateProject = () => {
                     
                     {selectedDesigner.hourlyRate && (
                       <p className="mt-1 text-sm text-gray-600">
-                        Rate: ${selectedDesigner.hourlyRate}/hr
+                        Rate: ₹{selectedDesigner.hourlyRate}/hr
                       </p>
                     )}
                   </div>
@@ -299,7 +351,7 @@ const CreateProject = () => {
                           key={skill._id || skill.name}
                           className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full mr-1 mb-1"
                         >
-                          {skill.name} {skill.rate && `($${skill.rate}/hr)`}
+                          {skill.name} {skill.rate && `(₹${skill.rate}/hr)`}
                         </span>
                       ))}
                     </div>
@@ -329,18 +381,28 @@ const CreateProject = () => {
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Designer Preview</h2>
-              <p className="text-gray-500">
-                Select a designer to see their details here.
-              </p>
-              <div className="mt-4">
-                <Link
-                  to="/app/designers"
-                  className="text-primary-600 hover:text-primary-800 text-sm font-medium"
-                >
-                  Browse Designers →
-                </Link>
-              </div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                {formData.projectType === 'direct' ? 'Designer Preview' : 'Open Bidding Mode'}
+              </h2>
+              {formData.projectType === 'direct' ? (
+                <>
+                  <p className="text-gray-500">
+                    Select a designer to see their details here.
+                  </p>
+                  <div className="mt-4">
+                    <Link
+                      to="/app/designers"
+                      className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                    >
+                      Browse Designers →
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-600 text-sm">
+                  This project will be visible to designers. They can submit bids and proposals, and you can choose the best bid to start collaboration.
+                </p>
+              )}
             </div>
           )}
         </div>

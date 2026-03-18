@@ -91,12 +91,12 @@ export const truncateText = (text, maxLength = 100) => {
 /**
  * Format currency amount
  * @param {number} amount - Amount to format
- * @param {string} currency - Currency code (default: USD)
+ * @param {string} currency - Currency code (default: INR)
  * @returns {string} Formatted currency string
  */
-export const formatCurrency = (amount, currency = 'USD') => {
+export const formatCurrency = (amount, currency = 'INR') => {
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency
     }).format(amount);

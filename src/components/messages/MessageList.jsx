@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
+import UserAvatar from '../common/UserAvatar';
 
 const MessageList = () => {
   const { currentUser } = useAuth();
@@ -416,11 +417,14 @@ const MessageList = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="flex-shrink-0">
-                              <div className="w-12 h-12 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium shadow-sm">
-                                {(conversation.user?.username || conversation.username || '?')
-                                  .charAt(0)
-                                  .toUpperCase()}
-                              </div>
+                              <UserAvatar
+                                user={{
+                                  username: conversation.user?.username || conversation.username,
+                                  avatarUrl: conversation.user?.avatarUrl || conversation.avatarUrl || ''
+                                }}
+                                sizeClass="w-12 h-12"
+                                className="shadow-sm"
+                              />
                             </div>
                             <div className="ml-4">
                               <div className="flex items-center">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { DocumentTextIcon, ArrowDownTrayIcon, CalendarIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, ArrowDownTrayIcon, CalendarIcon, TrashIcon, LinkIcon } from '@heroicons/react/24/outline';
 import api from '../../utils/api';
+import { retrieveFile, deleteFile } from '../../utils/fileStorage';
 
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/animations.css';
@@ -59,6 +60,32 @@ const FileDownload = ({
   // Check if URL is a Cloudinary URL
   const isCloudinaryUrl = (url) => {
     return url && (url.includes('cloudinary.com') || url.includes('res.cloudinary.com'));
+  };
+
+  const isExternalProjectLink = (url) => {
+    if (!url) return false;
+    return (
+      url.includes('github.com') ||
+      url.includes('drive.google.com') ||
+      url.includes('docs.google.com')
+    );
+  };
+
+  const getLinkSourceLabel = (url) => {
+    if (!url) return 'External Link';
+    if (url.includes('github.com')) return 'GitHub Link';
+    if (url.includes('drive.google.com') || url.includes('docs.google.com')) return 'Drive Link';
+    return 'External Link';
+  };
+
+  const getLinkHost = (url) => {
+    if (!url) return '';
+    try {
+      const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      return new URL(normalizedUrl).hostname.replace(/^www\./, '');
+    } catch {
+      return '';
+    }
   };
 
   // Handle blob URL downloads
@@ -422,6 +449,13 @@ const FileDownload = ({
       
       // Handle different download scenarios
       if (file.url) {
+        if (isExternalProjectLink(file.url)) {
+          const externalUrl = /^https?:\/\//i.test(file.url) ? file.url : `https://${file.url}`;
+          window.open(externalUrl, '_blank', 'noopener,noreferrer');
+          setDownloading(false);
+          return true;
+        }
+
         // For blob URLs, use special handling
         if (isBlobUrl(file.url)) {
           console.log('Using blob URL download method');
@@ -534,29 +568,39 @@ const FileDownload = ({
     }
   };
 
+  const isLinkItem = isExternalProjectLink(file?.url);
+  const linkSourceLabel = getLinkSourceLabel(file?.url);
+  const linkHost = getLinkHost(file?.url);
+
   return (
-    <div className={`file-card hover-lift ${className}`}>
+    <div className={`file-card ${isLinkItem ? 'file-card-link' : 'file-card-upload'} hover-lift ${className}`}>
       <div className="file-icon">
-        <DocumentTextIcon className="w-5 h-5" />
+        {isLinkItem ? <LinkIcon className="w-5 h-5" /> : <DocumentTextIcon className="w-5 h-5" />}
       </div>
       <div className="file-info">
-        <p className="file-name">{file.name}</p>
-        {showDate && file.uploadedAt && (
-          <div className="file-meta">
+        <p className={`file-name ${isLinkItem ? 'file-name-link' : ''}`}>{file.name}</p>
+        <div className="file-meta">
+          <span className={`file-type-badge ${isLinkItem ? 'link' : 'upload'}`}>
+            {isLinkItem ? linkSourceLabel : 'Uploaded File'}
+          </span>
+          {showDate && file.uploadedAt && (
             <span className="file-date">
               <CalendarIcon className="w-3 h-3" />
               {formatDate(file.uploadedAt)}
             </span>
-          </div>
-        )}
+          )}
+          {isLinkItem && linkHost && (
+            <span className="file-link-host">{linkHost}</span>
+          )}
+        </div>
         {error && <p className="file-error">{error}</p>}
       </div>
       <div className="file-actions">
         <button
           onClick={handleDownload}
           disabled={downloading || deleting}
-          className="file-download-btn"
-          title={error ? error : 'Download file'}
+          className={`file-download-btn ${isLinkItem ? 'file-open-link-btn' : ''}`}
+          title={error ? error : (isExternalProjectLink(file.url) ? 'Open link' : 'Download file')}
         >
           {downloading ? (
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -566,7 +610,7 @@ const FileDownload = ({
           ) : (
             <ArrowDownTrayIcon className="download-icon -ml-1 mr-1 h-4 w-4" />
           )}
-          Download
+          {isExternalProjectLink(file.url) ? 'Open Link' : 'Download'}
         </button>
         
         {showDeleteButton && (
@@ -575,20 +619,6 @@ const FileDownload = ({
             disabled={downloading || deleting}
             className="file-delete-btn"
             title="Delete file"
-            style={{ 
-              backgroundColor: '#ef4444', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              padding: '0.5rem 0.75rem', 
-              borderRadius: '0.375rem', 
-              color: 'white',
-              marginLeft: '0.5rem',
-              fontWeight: '500',
-              fontSize: '0.875rem',
-              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-              transition: 'all 0.2s ease'
-            }}
           >
             {deleting ? (
               <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -596,10 +626,7 @@ const FileDownload = ({
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             ) : (
-              <>
-                <TrashIcon className="h-4 w-4 mr-1" />
-                Delete
-              </>
+              <TrashIcon className="h-4 w-4" />
             )}
           </button>
         )}

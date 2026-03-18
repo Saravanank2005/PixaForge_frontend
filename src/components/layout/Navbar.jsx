@@ -9,7 +9,6 @@ import {
   UserIcon,
   ArrowRightOnRectangleIcon as LogoutIcon,
   MagnifyingGlassIcon,
-  Cog6ToothIcon,
   EnvelopeIcon,
   QuestionMarkCircleIcon,
   ChevronRightIcon,
@@ -19,6 +18,7 @@ import {
   MoonIcon
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
+import UserAvatar from '../common/UserAvatar';
 import '../../styles/navbar.css';
 
 const Navbar = ({ toggleSidebar }) => {
@@ -133,7 +133,7 @@ const Navbar = ({ toggleSidebar }) => {
       if (name === 'designers') displayName = 'Designers';
       if (name === 'messages') displayName = 'Messages';
       if (name === 'profile') displayName = 'Profile';
-      if (name === 'profilesettings') displayName = 'Settings';
+      if (name === 'profilesettings') displayName = 'Profile';
       
       const isLast = index === pathnames.length - 1 || 
                     (index === pathnames.length - 2 && pathnames[pathnames.length - 1].length > 20);
@@ -297,17 +297,13 @@ const Navbar = ({ toggleSidebar }) => {
             onClick={toggleProfileMenu}
             aria-label="User menu"
           >
-            <div className="profile-avatar w-8 h-8">
-              {getInitial()}
-            </div>
+            <UserAvatar user={currentUser} sizeClass="w-8 h-8" className="profile-avatar" textClass="text-xs font-semibold" />
           </button>
           
           {showProfile && (
             <div className="navbar-dropdown profile-dropdown">
               <div className="profile-header">
-                <div className="profile-avatar">
-                  {getInitial()}
-                </div>
+                <UserAvatar user={currentUser} sizeClass="w-10 h-10" className="profile-avatar" />
                 <div className="profile-info">
                   <div className="profile-name">
                     {getUserName()}
@@ -322,10 +318,6 @@ const Navbar = ({ toggleSidebar }) => {
                 <Link to="/app/profile" className="profile-menu-item">
                   <UserIcon className="profile-menu-icon" />
                   Your Profile
-                </Link>
-                <Link to="/app/profilesettings" className="profile-menu-item">
-                  <Cog6ToothIcon className="profile-menu-icon" />
-                  Settings
                 </Link>
                 <Link to="/app/help" className="profile-menu-item">
                   <QuestionMarkCircleIcon className="profile-menu-icon" />

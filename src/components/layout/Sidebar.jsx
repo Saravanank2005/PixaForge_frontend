@@ -6,7 +6,6 @@ import {
   FolderIcon,
   PlusCircleIcon,
   ChatBubbleLeftRightIcon,
-  Cog6ToothIcon,
   UserIcon,
   ChevronLeftIcon,
   Squares2X2Icon,
@@ -16,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 import api from '../../utils/api';
+import UserAvatar from '../common/UserAvatar';
 import '../../styles/sidebar.css';
 
 const Sidebar = ({ open, toggleSidebar }) => {
@@ -36,21 +36,32 @@ const Sidebar = ({ open, toggleSidebar }) => {
     const fetchCounts = async () => {
       try {
         setLoading(true);
-        const [notificationsRes, conversationsRes, projectsRes] = await Promise.all([
+        const [notificationsRes, conversationsRes, statsRes] = await Promise.allSettled([
           api.get('/api/notifications', { params: { read: false } }),
           api.get('/api/messages/conversations'),
-          api.get('/api/projects')
+          api.get('/api/projects/stats')
         ]);
         
-        // Process all data at once
+        const unreadNotifications = notificationsRes.status === 'fulfilled'
+          ? notificationsRes.value.data.length
+          : 0;
+
+        const unreadMessages = conversationsRes.status === 'fulfilled'
+          ? conversationsRes.value.data.reduce(
+              (total, conversation) => total + (conversation.unreadCount || 0),
+              0
+            )
+          : 0;
+
+        const activeProjects = statsRes.status === 'fulfilled'
+          ? statsRes.value.data.activeProjects
+          : 0;
+
+        // Process all data at once with per-request fallbacks
         setCounts({
-          unreadNotifications: notificationsRes.data.length,
-          unreadMessages: conversationsRes.data.reduce(
-            (total, conversation) => total + (conversation.unreadCount || 0), 0
-          ),
-          activeProjects: projectsRes.data.filter(
-            project => !['completed', 'cancelled'].includes(project.status)
-          ).length
+          unreadNotifications,
+          unreadMessages,
+          activeProjects
         });
       } catch (error) {
         console.error('Error fetching counts:', error);
@@ -129,12 +140,6 @@ const Sidebar = ({ open, toggleSidebar }) => {
           showTo: ['client', 'designer'],
         },
         {
-          name: 'Settings',
-          path: '/app/profilesettings',
-          icon: Cog6ToothIcon,
-          showTo: ['client', 'designer'],
-        },
-        {
           name: 'Help',
           path: '/app/help',
           icon: QuestionMarkCircleIcon,
@@ -151,6 +156,8 @@ const Sidebar = ({ open, toggleSidebar }) => {
   };
 
   const getUserRole = () => isClient ? 'Client' : isDesigner ? 'Designer' : 'User';
+  const displayName = currentUser?.name || currentUser?.username || currentUser?.email?.split('@')?.[0] || getUserRole();
+  const showRole = displayName.toLowerCase() !== getUserRole().toLowerCase();
 
   return (
     <>
@@ -245,16 +252,12 @@ const Sidebar = ({ open, toggleSidebar }) => {
         
         {/* User profile */}
         <div className="sidebar-profile">
-          <div className="sidebar-profile-avatar">
-            {getInitial()}
-          </div>
+          <UserAvatar user={currentUser} sizeClass="w-10 h-10" className="sidebar-profile-avatar" textClass="text-sm font-semibold" />
           <div className="sidebar-profile-info">
             <div className="sidebar-profile-name">
-              {currentUser?.name || getUserRole()}
+              {displayName}
             </div>
-            <div className="sidebar-profile-role">
-              {getUserRole()}
-            </div>
+            {showRole && <div className="sidebar-profile-role">{getUserRole()}</div>}
           </div>
         </div>
       </aside>

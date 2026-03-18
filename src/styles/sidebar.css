@@ -224,7 +224,7 @@
   border-top: 1px solid var(--sidebar-border);
   display: flex;
   align-items: center;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   transition: padding var(--sidebar-transition);
 }
 

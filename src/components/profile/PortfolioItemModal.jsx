@@ -100,15 +100,39 @@ const PortfolioItemModal = ({ item, onClose, onDownload, designerId }) => {
                       Visit Project
                     </button>
                   )}
+
+                  {item.githubUrl && (
+                    <button
+                      type="button"
+                      onClick={() => openProjectUrl(item.githubUrl)}
+                      className="inline-flex items-center px-3 py-1.5 border border-gray-700 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 text-sm"
+                    >
+                      <LinkIcon className="h-4 w-4 mr-1" />
+                      GitHub Repo
+                    </button>
+                  )}
+
+                  {item.driveUrl && (
+                    <button
+                      type="button"
+                      onClick={() => openProjectUrl(item.driveUrl)}
+                      className="inline-flex items-center px-3 py-1.5 border border-green-600 text-green-700 rounded-md hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-sm"
+                    >
+                      <LinkIcon className="h-4 w-4 mr-1" />
+                      Drive Link
+                    </button>
+                  )}
                   
-                  <button
-                    type="button"
-                    onClick={() => onDownload(item)}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 text-sm"
-                  >
-                    <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
-                    Download
-                  </button>
+                  {item.imageUrl && (
+                    <button
+                      type="button"
+                      onClick={() => onDownload(item)}
+                      className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 text-sm"
+                    >
+                      <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
+                      Download
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

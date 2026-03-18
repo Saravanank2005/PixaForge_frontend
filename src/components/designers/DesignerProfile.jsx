@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
+import UserAvatar from '../common/UserAvatar';
 
 const DesignerProfile = () => {
   const { designerId } = useParams();
@@ -164,9 +165,7 @@ const DesignerProfile = () => {
           <div className="p-8 sm:p-10">
             <div className="flex flex-col md:flex-row md:items-start">
               <div className="flex-shrink-0 mb-6 md:mb-0">
-                <div className="w-28 h-28 rounded-full bg-sky-500 flex items-center justify-center text-white text-4xl font-semibold">
-                  {designer.username.charAt(0).toUpperCase()}
-                </div>
+                <UserAvatar user={designer} sizeClass="w-28 h-28" textClass="text-4xl font-semibold" className="shadow-md" bgClass="bg-sky-500 text-white" />
               </div>
               
               <div className="md:ml-8 flex-1">
@@ -175,6 +174,10 @@ const DesignerProfile = () => {
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                       {designer.username}
                     </h1>
+
+                    {designer.professionalHeadline && (
+                      <p className="mt-2 text-base text-sky-700 font-medium">{designer.professionalHeadline}</p>
+                    )}
                     
                     {designer.averageRating > 0 && (
                       <div className="flex items-center mt-2">
@@ -211,7 +214,7 @@ const DesignerProfile = () => {
                   {designer.hourlyRate && (
                     <div className="mt-6 md:mt-0 md:text-right">
                       <p className="text-3xl font-bold text-gray-900">
-                        ${designer.hourlyRate}/hr
+                        ₹{designer.hourlyRate}/hr
                       </p>
                     </div>
                   )}
@@ -226,10 +229,19 @@ const DesignerProfile = () => {
                           key={skill._id || skill.name}
                           className="skill-tag inline-flex items-center bg-sky-100 text-sky-800 text-sm font-medium px-4 py-1.5 rounded-full"
                         >
-                          {skill.name} {skill.rate && `($${skill.rate}/hr)`}
+                          {skill.name} {skill.rate && `(₹${skill.rate}/hr)`}
+                          {skill.proficiency ? ` • ${skill.proficiency}` : ''}
+                          {skill.yearsExperience ? ` • ${skill.yearsExperience} yrs` : ''}
                         </span>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {designer.hiringPreference && (
+                  <div className="mt-4">
+                    <h2 className="text-sm font-medium text-gray-700 mb-1">Hiring Style Preference</h2>
+                    <p className="text-sm text-gray-600 capitalize">{designer.hiringPreference}</p>
                   </div>
                 )}
                 
@@ -296,11 +308,17 @@ const DesignerProfile = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {designer.portfolio.map((item, index) => (
                       <div key={item._id || index} className="portfolio-card bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <img 
-                          src={item.imageUrl} 
-                          alt={item.title} 
-                          className="w-full h-56 object-cover"
-                        />
+                        {item.imageUrl ? (
+                          <img 
+                            src={item.imageUrl} 
+                            alt={item.title} 
+                            className="w-full h-56 object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-56 bg-white flex items-center justify-center px-4 text-center text-sm text-gray-500 border-b border-gray-200">
+                            No image uploaded for this project. Use links below to view the work.
+                          </div>
+                        )}
                         <div className="p-6">
                           <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             {item.title}
@@ -310,6 +328,42 @@ const DesignerProfile = () => {
                               {item.description}
                             </p>
                           )}
+
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {item.projectUrl && (
+                              <a
+                                href={item.projectUrl.startsWith('http') ? item.projectUrl : `https://${item.projectUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-sky-100 text-sky-700 hover:bg-sky-200"
+                              >
+                                Project Link
+                              </a>
+                            )}
+
+                            {item.githubUrl && (
+                              <a
+                                href={item.githubUrl.startsWith('http') ? item.githubUrl : `https://${item.githubUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-gray-200 text-gray-800 hover:bg-gray-300"
+                              >
+                                GitHub
+                              </a>
+                            )}
+
+                            {item.driveUrl && (
+                              <a
+                                href={item.driveUrl.startsWith('http') ? item.driveUrl : `https://${item.driveUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200"
+                              >
+                                Drive
+                              </a>
+                            )}
+                          </div>
+
                           <p className="text-xs text-gray-500 mt-3">
                             {new Date(item.createdAt).toLocaleDateString()}
                           </p>

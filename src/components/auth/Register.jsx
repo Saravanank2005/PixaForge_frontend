@@ -152,18 +152,18 @@ const Register = () => {
     <div className="auth-container">
       <div className="auth-background"></div>
       
-      <div className="auth-card">
-        <form className="auth-form auth-compact-form" onSubmit={handleSubmit}>
+      <div className="auth-card auth-register-card">
+        <form className="auth-form auth-compact-form auth-register-refined" onSubmit={handleSubmit}>
           <div className="auth-form-header">
             <div className="auth-logo">
               <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
               </svg>
             </div>
-            <h2 className="mt-4 text-center text-2xl font-bold text-gray-900 font-['Outfit']">
+            <h2 className="auth-title mt-4 text-center text-2xl font-bold font-['Outfit']">
               Create Your Account
             </h2>
-            <p className="mt-1 text-center text-sm text-gray-600">
+            <p className="auth-subtitle mt-1 text-center text-sm">
               Join PixaForge and start your journey
             </p>
           </div>
@@ -241,7 +241,7 @@ const Register = () => {
                 </div>
               </div>
               
-              <div className="auth-form-field">
+              <div className="auth-form-field full-span">
                 <label htmlFor="username" className="auth-label">Username</label>
                 <div className="auth-input-wrapper">
                   <input
@@ -259,7 +259,7 @@ const Register = () => {
                 </div>
               </div>
               
-              <div className="auth-form-field">
+              <div className="auth-form-field full-span">
                 <label htmlFor="email" className="auth-label">Email Address</label>
                 <div className="auth-input-wrapper">
                   <input
@@ -339,7 +339,7 @@ const Register = () => {
                     </svg>
                     <span className="font-medium">Location Information</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">
+                  <p className="auth-subtitle text-sm mb-3">
                     As a designer, sharing your location helps clients find you in their area.
                   </p>
                   

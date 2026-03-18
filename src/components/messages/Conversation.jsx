@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import ChatMessage from './ChatMessage';
+import UserAvatar from '../common/UserAvatar';
 
 const ConversationFixed = () => {
   const params = useParams();
@@ -342,9 +343,7 @@ const ConversationFixed = () => {
           </button>
           
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium shadow-sm">
-              {otherUser?.username?.charAt(0).toUpperCase() || '?'}
-            </div>
+            <UserAvatar user={otherUser} sizeClass="w-10 h-10" className="shadow-sm" />
             
             <div className="ml-3">
               <h2 className="text-lg font-semibold text-gray-900">
@@ -435,9 +434,7 @@ const ConversationFixed = () => {
               className="flex mb-4 justify-start"
             >
               <div className="flex-shrink-0 mr-2 self-end mb-1">
-                <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-medium shadow-sm">
-                  {otherUser?.username?.charAt(0).toUpperCase() || '?'}
-                </div>
+                <UserAvatar user={otherUser} sizeClass="w-8 h-8" textClass="text-xs font-medium" className="shadow-sm" />
               </div>
               
               <div className="bg-white border border-gray-100 px-4 py-2 rounded-2xl rounded-bl-none shadow-sm">

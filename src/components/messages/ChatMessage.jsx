@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import UserAvatar from '../common/UserAvatar';
 
 /**
  * ChatMessage component for displaying individual messages in the chat
@@ -29,9 +30,7 @@ const ChatMessage = ({
       {/* Avatar for received messages - left side */}
       {!isCurrentUser && showAvatar && (
         <div className="flex-shrink-0 mr-2 self-end mb-1">
-          <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-xs font-medium shadow-md ring-2 ring-white">
-            {otherUser?.username?.charAt(0).toUpperCase() || otherUser?.name?.charAt(0).toUpperCase() || '?'}
-          </div>
+          <UserAvatar user={otherUser} sizeClass="w-8 h-8" className="shadow-md ring-2 ring-white" textClass="text-xs font-medium" bgClass="bg-gray-600 text-white" />
         </div>
       )}
       
@@ -73,11 +72,7 @@ const ChatMessage = ({
       {/* Avatar for sent messages - right side */}
       {isCurrentUser && showAvatar && (
         <div className="flex-shrink-0 ml-2 self-end mb-1">
-          <div className="w-8 h-8 rounded-full bg-sky-700 flex items-center justify-center text-white text-xs font-medium shadow-md ring-2 ring-white">
-            {currentUser?.username?.charAt(0).toUpperCase() || 
-             currentUser?.name?.charAt(0).toUpperCase() || 
-             currentUser?.email?.charAt(0).toUpperCase() || '?'}
-          </div>
+          <UserAvatar user={currentUser} sizeClass="w-8 h-8" className="shadow-md ring-2 ring-white" textClass="text-xs font-medium" bgClass="bg-sky-700 text-white" />
         </div>
       )}
     </motion.div>

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SocketProvider } from './contexts/SocketContext';
@@ -14,7 +14,6 @@ import Dashboard from './components/dashboard/Dashboard';
 import MessageList from './components/messages/MessageList';
 import Conversation from './components/messages/Conversation';
 import Profile from './components/profile/Profile';
-import ProfileSettings from './components/profile/ProfileSettings';
 import ProjectList from './components/projects/ProjectList';
 import ProjectDetails from './components/projects/ProjectDetails';
 import CreateProject from './components/projects/CreateProject';
@@ -62,7 +61,7 @@ function App() {
                     <Route path="messages" element={<MessageList />} />
                     <Route path="messages/:userId" element={<Conversation />} />
                     <Route path="profile" element={<Profile />} />
-                    <Route path="profilesettings" element={<ProfileSettings />} />
+                    <Route path="profilesettings" element={<Navigate to="/app/profile" replace />} />
                     <Route path="projects/create" element={<CreateProject />} />
                     <Route path="projects/:projectId" element={<ProjectDetails />} />
                     <Route path="projects" element={<ProjectList />} />

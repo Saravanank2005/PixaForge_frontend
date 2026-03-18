@@ -253,7 +253,7 @@ const DesignerMap = () => {
             {/* Max Rate Filter */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Maximum Rate ($/hour)
+                Maximum Rate (₹/hour)
               </label>
               <input
                 type="number"
@@ -329,7 +329,7 @@ const DesignerMap = () => {
                             <span className="font-medium">Rating:</span> {designer.rating || 'N/A'}
                           </p>
                           <p className="text-sm">
-                            <span className="font-medium">Rate:</span> ${designer.rate}/hour
+                            <span className="font-medium">Rate:</span> ₹{designer.rate}/hour
                           </p>
                         </div>
                         <Link

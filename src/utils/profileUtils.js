@@ -21,14 +21,14 @@ export const fetchUserProfile = async (userId = null) => {
 };
 
 /**
- * Upload portfolio item with image
+ * Upload portfolio item with image and/or links
  * @param {Object} portfolioItem - Portfolio item data
  * @param {string} portfolioItem.title - Title of the portfolio item
  * @param {string} portfolioItem.description - Description of the portfolio item
  * @param {string} portfolioItem.category - Category of the portfolio item (optional)
  * @param {Array} portfolioItem.tags - Tags for the portfolio item (optional)
  * @param {string} portfolioItem.projectUrl - Project URL (optional)
- * @param {File} portfolioItem.image - Image file (required for new items, optional for updates)
+ * @param {File} portfolioItem.image - Image file (optional)
  * @param {string} portfolioItem._id - Item ID (only for updates)
  * @param {Function} onProgress - Progress callback function (optional)
  * @param {boolean} isUpdate - Whether this is an update to an existing item
@@ -41,8 +41,13 @@ export const uploadPortfolioItem = async (portfolioItem, onProgress, isUpdate = 
       throw new Error('Please provide a title and description');
     }
     
-    if (!isUpdate && !portfolioItem.image) {
-      throw new Error('Please upload an image');
+    if (
+      !portfolioItem.image &&
+      !portfolioItem.projectUrl &&
+      !portfolioItem.githubUrl &&
+      !portfolioItem.driveUrl
+    ) {
+      throw new Error('Add at least one: image, project URL, GitHub URL, or Drive URL');
     }
     
     // Create form data for upload
@@ -53,6 +58,8 @@ export const uploadPortfolioItem = async (portfolioItem, onProgress, isUpdate = 
     // Add optional fields if they exist
     if (portfolioItem.category) formData.append('category', portfolioItem.category);
     if (portfolioItem.projectUrl) formData.append('projectUrl', portfolioItem.projectUrl);
+    if (portfolioItem.githubUrl) formData.append('githubUrl', portfolioItem.githubUrl);
+    if (portfolioItem.driveUrl) formData.append('driveUrl', portfolioItem.driveUrl);
     if (portfolioItem.tags && portfolioItem.tags.length > 0) {
       formData.append('tags', JSON.stringify(portfolioItem.tags));
     }

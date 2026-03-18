@@ -11,6 +11,8 @@ const PortfolioForm = ({ onSuccess, onError, editItem = null }) => {
     description: '',
     category: '',
     projectUrl: '',
+    githubUrl: '',
+    driveUrl: '',
     tags: [],
     image: null,
     imagePreview: null
@@ -154,12 +156,20 @@ const PortfolioForm = ({ onSuccess, onError, editItem = null }) => {
       newErrors.category = 'Please select a category';
     }
     
-    if (portfolioItem.projectUrl && !/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(portfolioItem.projectUrl)) {
+    if (portfolioItem.projectUrl && !/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,})([/\w .?%&=+#-]*)*\/?$/i.test(portfolioItem.projectUrl)) {
       newErrors.projectUrl = 'Please enter a valid URL';
     }
+
+    if (portfolioItem.githubUrl && !/^(https?:\/\/)?(www\.)?github\.com\/[^\s]+$/i.test(portfolioItem.githubUrl)) {
+      newErrors.githubUrl = 'Please enter a valid GitHub repository URL';
+    }
+
+    if (portfolioItem.driveUrl && !/^(https?:\/\/)?(drive\.google\.com|docs\.google\.com)\/[^\s]+$/i.test(portfolioItem.driveUrl)) {
+      newErrors.driveUrl = 'Please enter a valid Google Drive or Docs URL';
+    }
     
-    if (!editItem && !portfolioItem.image) {
-      newErrors.image = 'Please upload an image';
+    if (!portfolioItem.image && !portfolioItem.projectUrl && !portfolioItem.githubUrl && !portfolioItem.driveUrl) {
+      newErrors.image = 'Add an image or at least one project link';
     }
     
     setErrors(newErrors);
@@ -191,6 +201,8 @@ const PortfolioForm = ({ onSuccess, onError, editItem = null }) => {
         description: '',
         category: '',
         projectUrl: '',
+        githubUrl: '',
+        driveUrl: '',
         tags: [],
         image: null,
         imagePreview: null
@@ -271,6 +283,32 @@ const PortfolioForm = ({ onSuccess, onError, editItem = null }) => {
         {errors.projectUrl && <p className="mt-1 text-sm text-red-600">{errors.projectUrl}</p>}
         <p className="mt-1 text-xs text-gray-500">Optional: Add a link to view your project</p>
       </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">GitHub Repository URL</label>
+        <input
+          type="text"
+          name="githubUrl"
+          value={portfolioItem.githubUrl || ''}
+          onChange={handleChange}
+          className={`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm ${errors.githubUrl ? 'border-red-300' : 'border-gray-300'} rounded-md`}
+          placeholder="https://github.com/username/repo"
+        />
+        {errors.githubUrl && <p className="mt-1 text-sm text-red-600">{errors.githubUrl}</p>}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Google Drive Link</label>
+        <input
+          type="text"
+          name="driveUrl"
+          value={portfolioItem.driveUrl || ''}
+          onChange={handleChange}
+          className={`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm ${errors.driveUrl ? 'border-red-300' : 'border-gray-300'} rounded-md`}
+          placeholder="https://drive.google.com/file/..."
+        />
+        {errors.driveUrl && <p className="mt-1 text-sm text-red-600">{errors.driveUrl}</p>}
+      </div>
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
@@ -317,7 +355,7 @@ const PortfolioForm = ({ onSuccess, onError, editItem = null }) => {
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Upload Image {!editItem && <span className="text-red-500">*</span>}
+          Upload Image (optional)
         </label>
         <div className="mt-1 flex items-center">
           <input
@@ -352,7 +390,7 @@ const PortfolioForm = ({ onSuccess, onError, editItem = null }) => {
           )}
         </div>
         {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
-        <p className="mt-1 text-xs text-gray-500">JPG, PNG or GIF up to 5MB</p>
+        <p className="mt-1 text-xs text-gray-500">JPG, PNG or GIF up to 5MB. You can also submit only links.</p>
         
         {uploadProgress > 0 && uploadProgress < 100 && (
           <div className="mt-2">

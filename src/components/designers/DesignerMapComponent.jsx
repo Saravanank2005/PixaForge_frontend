@@ -227,9 +227,9 @@ const DesignerMapComponent = ({ position, designers, radiusKm }) => {
               
               <div className="flex items-start mt-1">
                 <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0 mr-3">
-                  {selectedDesigner.profileImage ? (
+                  {selectedDesigner.avatarUrl ? (
                     <img 
-                      src={selectedDesigner.profileImage} 
+                      src={selectedDesigner.avatarUrl} 
                       alt={selectedDesigner.username} 
                       className="h-10 w-10 rounded-full object-cover"
                     />
