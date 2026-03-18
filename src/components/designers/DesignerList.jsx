@@ -69,6 +69,18 @@ const AVAILABLE_SKILLS = [
   { name: 'Print Design', defaultRate: 400 }
 ];
 
+const getDesignerDisplayName = (designer) => {
+  const name = designer?.name || designer?.username || designer?.email;
+  if (typeof name === 'string' && name.trim()) return name.trim();
+  return 'Designer';
+};
+
+const getDesignerHeadline = (designer) => {
+  const headline = designer?.professionalHeadline;
+  if (typeof headline === 'string' && headline.trim()) return headline.trim();
+  return 'Freelance Designer';
+};
+
 const DesignerList = () => {
   const [designers, setDesigners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -421,32 +433,40 @@ const DesignerList = () => {
                 </div>
               ) : (
                 <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 auto-rows-fr">
                   {designers.map((designer, designerIndex) => {
-                    const highlightCard = designerIndex % 5 === 0;
+                    const displayName = getDesignerDisplayName(designer);
+                    const headline = getDesignerHeadline(designer);
+                    const normalizedRating = Number(designer?.averageRating);
+                    const ratingLabel = Number.isFinite(normalizedRating) && normalizedRating > 0
+                      ? normalizedRating.toFixed(1)
+                      : 'New';
+
                     return (
                     <div
                       key={`designer-${designer._id}-${designerIndex}`}
-                      className={`p-6 bg-white border border-gray-100 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px] designer-card h-full ${highlightCard ? 'xl:col-span-2' : ''}`}
+                      className="p-5 bg-white border border-gray-100 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px] designer-card h-full"
                     >
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 h-full">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-2 gap-3">
-                            <div className="flex items-center gap-3 min-w-0">
-                              <UserAvatar user={designer} sizeClass="w-11 h-11" className="shadow-sm flex-shrink-0" />
-                              <h3 className="text-xl font-bold text-gray-900 truncate">{designer.name || designer.username}</h3>
-                            </div>
-                            <div className="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                              <span className="text-gray-700 font-medium ml-1">{designer.averageRating?.toFixed(1) || 'New'}</span>
+                      <div className="flex flex-col h-full">
+                        <div className="flex items-start justify-between gap-3 min-w-0">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <UserAvatar user={designer} sizeClass="w-11 h-11" className="shadow-sm flex-shrink-0" textClass="text-sm font-semibold" />
+                            <div className="min-w-0">
+                              <h3 className="text-lg font-bold text-gray-900 truncate">{displayName}</h3>
+                              <p className="text-xs text-gray-500 truncate">{headline}</p>
                             </div>
                           </div>
-                          
-                          {/* Distance indicator */}
-                          {designer.distance && (
-                            <div className="text-sm text-sky-600 font-medium mb-3 flex items-center">
+                          <div className="flex items-center rounded-full bg-amber-50 text-amber-700 px-2.5 py-1 text-xs font-semibold whitespace-nowrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span className="ml-1">{ratingLabel}</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 space-y-3 min-w-0 flex-1">
+                          {typeof designer.distance === 'number' && (
+                            <div className="inline-flex items-center text-xs text-sky-700 bg-sky-50 border border-sky-100 rounded-full px-2.5 py-1 font-medium whitespace-nowrap max-w-full">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -454,11 +474,10 @@ const DesignerList = () => {
                               {designer.distance.toFixed(1)} km away
                             </div>
                           )}
-                          
-                          {/* Skills */}
+
                           {designer.skills && designer.skills.length > 0 && (
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {designer.skills.slice(0, highlightCard ? 6 : 4).map((skill, skillIndex) => (
+                            <div className="flex flex-wrap gap-2">
+                              {designer.skills.slice(0, 4).map((skill, skillIndex) => (
                                 <span
                                   key={`skill-${designer._id}-${skill.name}-${skillIndex}`}
                                   className="skill-tag inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sky-100 text-sky-800"
@@ -466,27 +485,32 @@ const DesignerList = () => {
                                   {skill.name} {skill.rate && `- ₹${skill.rate}/hr`}
                                 </span>
                               ))}
-                              {designer.skills.length > (highlightCard ? 6 : 4) && (
-                                <span className="text-xs text-gray-500">+{designer.skills.length - (highlightCard ? 6 : 4)} more</span>
+                              {designer.skills.length > 4 && (
+                                <span className="text-xs text-gray-500 self-center">+{designer.skills.length - 4} more</span>
                               )}
                             </div>
                           )}
-                          
-                          {/* Bio */}
+
                           {designer.bio && (
-                            <p className={`mt-3 text-sm text-gray-600 ${highlightCard ? 'line-clamp-3' : 'line-clamp-2'} break-words`}>
+                            <p className="text-sm text-gray-600 line-clamp-2 break-words">
                               {designer.bio}
                             </p>
                           )}
                         </div>
-                        
-                        <div className="sm:ml-4 flex-shrink-0 self-start sm:self-end">
-                          <Link
-                            to={`/app/designers/${designer._id}`}
-                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300 whitespace-nowrap"
-                          >
-                            View Profile
-                          </Link>
+
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                            <Link
+                              to={`/app/designers/${designer._id}?tab=portfolio`}
+                              className="inline-flex items-center justify-center px-4 py-2 border border-sky-200 rounded-lg shadow-sm text-sm font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300 whitespace-nowrap"
+                            >
+                              See Works
+                            </Link>
+                            <Link
+                              to={`/app/designers/${designer._id}`}
+                              className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300 whitespace-nowrap"
+                            >
+                              View Profile
+                            </Link>
                         </div>
                       </div>
                     </div>

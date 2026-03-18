@@ -116,6 +116,14 @@
   animation-delay: -7.5s;
 }
 
+.auth-login-view .auth-background {
+  background: linear-gradient(145deg, #ecfeff 0%, #eef2ff 60%, #e0f2fe 100%);
+}
+
+.auth-register-view .auth-background {
+  background: linear-gradient(145deg, #f0f9ff 0%, #ecfeff 45%, #f5f3ff 100%);
+}
+
 @keyframes float {
   0% {
     transform: translate(0, 0) scale(1);
@@ -136,6 +144,38 @@
 .auth-form-header {
   text-align: center;
   margin-bottom: 1.5rem;
+}
+
+.auth-mini-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  background: rgba(14, 165, 233, 0.08);
+  color: #0369a1;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.auth-inline-points {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.45rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.auth-inline-points span {
+  font-size: 0.72rem;
+  color: #0f766e;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
 }
 
 .auth-title {
@@ -455,19 +495,73 @@
 .auth-location-section {
   background: rgba(14, 165, 233, 0.05);
   border-radius: 0.75rem;
-  padding: 1rem;
-  margin-top: 1rem;
+  padding: 0.5rem 0.55rem;
+  margin-top: 0.35rem;
 }
 
 .auth-location-header {
   display: flex;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.2rem;
   color: #0369a1;
 }
 
 .auth-location-header svg {
   margin-right: 0.5rem;
+}
+
+.auth-location-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  border-radius: 8px;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  background: rgba(255, 255, 255, 0.85);
+  color: #0f172a;
+  font-size: 0.76rem;
+  font-weight: 600;
+  height: 1.75rem;
+  min-width: 132px;
+  padding: 0 0.55rem;
+  transition: all var(--transition-fast) ease;
+}
+
+.auth-location-note {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: #0369a1;
+}
+
+.auth-location-action-row {
+  margin-top: 0.35rem;
+}
+
+.auth-location-status {
+  margin-top: 0.34rem;
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.auth-location-status.success {
+  color: #15803d;
+}
+
+.auth-location-status.muted {
+  color: #64748b;
+}
+
+.auth-location-btn:hover:not(:disabled) {
+  border-color: rgba(2, 132, 199, 0.45);
+  background: #ffffff;
+}
+
+.auth-location-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* Responsive styles */
@@ -578,8 +672,14 @@
 
 .auth-register-refined .auth-location-section {
   margin-top: 0.5rem;
-  padding: 0.8rem;
+  padding: 0.48rem 0.55rem;
   border: 1px solid rgba(14, 165, 233, 0.15);
+}
+
+.auth-register-refined .auth-location-btn {
+  height: 1.72rem;
+  font-size: 0.74rem;
+  min-width: 126px;
 }
 
 .auth-register-refined .auth-divider {
@@ -588,6 +688,39 @@
 
 .auth-register-refined .auth-back-link {
   margin-top: 0.75rem;
+}
+
+/* Login-specific compact premium look */
+.auth-login-card {
+  max-width: 520px;
+}
+
+.auth-login-refined {
+  padding: 1.35rem 1.35rem 1.25rem;
+}
+
+.auth-login-refined .auth-form-header {
+  margin-bottom: 1.2rem;
+}
+
+.auth-login-refined .auth-title {
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.auth-login-refined .auth-input,
+.auth-login-refined .auth-button,
+.auth-login-refined .auth-button-secondary {
+  height: 2.55rem;
+}
+
+.auth-login-refined .auth-divider {
+  margin: 1rem 0;
+}
+
+.auth-login-refined .auth-button-secondary {
+  border-color: rgba(14, 165, 233, 0.25);
 }
 
 @media (max-width: 640px) {
@@ -621,6 +754,33 @@
   background: rgba(15, 23, 42, 0.82);
   border-color: rgba(51, 65, 85, 0.9);
   box-shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+}
+
+.dark-mode .auth-mini-badge {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #bae6fd;
+}
+
+.dark-mode .auth-inline-points span {
+  color: #99f6e4;
+  background: rgba(45, 212, 191, 0.16);
+  border-color: rgba(45, 212, 191, 0.32);
+}
+
+.dark-mode .auth-location-btn {
+  background: rgba(30, 41, 59, 0.86);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #e2e8f0;
+}
+
+.dark-mode .auth-location-note,
+.dark-mode .auth-location-status.muted {
+  color: #bae6fd;
+}
+
+.dark-mode .auth-location-status.success {
+  color: #86efac;
 }
 
 .dark-mode .auth-input,

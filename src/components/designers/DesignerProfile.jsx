@@ -1,20 +1,61 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import UserAvatar from '../common/UserAvatar';
 
+const PROJECT_TYPE_LABELS = {
+  logo: 'Logo Design',
+  branding: 'Brand Identity',
+  uiux: 'UI/UX',
+  web: 'Web Design',
+  mobile: 'Mobile App Design',
+  illustration: 'Illustration',
+  print: 'Print Design',
+  other: 'Other'
+};
+
+const renderStarIcons = (count, sizeClass = 'w-5 h-5') => (
+  <div className="flex items-center">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <svg
+        key={star}
+        className={`${sizeClass} ${star <= count ? 'text-yellow-400' : 'text-gray-300'}`}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3 .921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+    ))}
+  </div>
+);
+
+const getProjectTypeLabel = (value) => PROJECT_TYPE_LABELS[value] || 'General Design';
+
+const safeNumber = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 const DesignerProfile = () => {
   const { designerId } = useParams();
+  const location = useLocation();
   const { currentUser, isClient } = useAuth();
   const navigate = useNavigate();
+  const tabFromQuery = new URLSearchParams(location.search).get('tab');
   
   const [designer, setDesigner] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('portfolio');
+  const [activeTab, setActiveTab] = useState(tabFromQuery === 'reviews' ? 'reviews' : 'portfolio');
   const [reviewForm, setReviewForm] = useState({
     rating: 5,
+    title: '',
+    projectType: '',
+    communication: 5,
+    timeliness: 5,
+    valueForMoney: 5,
+    wouldRecommend: true,
     review: ''
   });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -42,12 +83,22 @@ const DesignerProfile = () => {
     
     fetchDesignerProfile();
   }, [designerId]);
+
+  useEffect(() => {
+    if (tabFromQuery === 'reviews' || tabFromQuery === 'portfolio') {
+      setActiveTab(tabFromQuery);
+    }
+  }, [tabFromQuery]);
   
   const handleReviewChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setReviewForm({
       ...reviewForm,
-      [name]: name === 'rating' ? parseInt(value) : value
+      [name]: type === 'checkbox'
+        ? checked
+        : ['rating', 'communication', 'timeliness', 'valueForMoney'].includes(name)
+          ? parseInt(value)
+          : value
     });
   };
   
@@ -72,6 +123,12 @@ const DesignerProfile = () => {
       // Reset form
       setReviewForm({
         rating: 5,
+        title: '',
+        projectType: '',
+        communication: 5,
+        timeliness: 5,
+        valueForMoney: 5,
+        wouldRecommend: true,
         review: ''
       });
       
@@ -89,7 +146,48 @@ const DesignerProfile = () => {
   
   const handleMessageClick = () => {
     navigate(`/app/messages/${designerId}`);
-  }; 
+  };
+
+  const sortedRatings = useMemo(() => {
+    const ratings = Array.isArray(designer?.ratings) ? [...designer.ratings] : [];
+    return ratings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [designer?.ratings]);
+
+  const reviewInsights = useMemo(() => {
+    if (!sortedRatings.length) {
+      return {
+        total: 0,
+        average: 0,
+        recommendRate: 0,
+        communicationAvg: null,
+        timelinessAvg: null,
+        valueAvg: null
+      };
+    }
+
+    const total = sortedRatings.length;
+    const avg = sortedRatings.reduce((sum, item) => sum + Number(item.rating || 0), 0) / total;
+
+    const recommendCount = sortedRatings.filter((item) => item.wouldRecommend === true).length;
+    const recommendRate = Math.round((recommendCount / total) * 100);
+
+    const metricAverage = (key) => {
+      const values = sortedRatings
+        .map((item) => safeNumber(item[key]))
+        .filter((value) => value !== null);
+      if (!values.length) return null;
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    };
+
+    return {
+      total,
+      average: avg,
+      recommendRate,
+      communicationAvg: metricAverage('communication'),
+      timelinessAvg: metricAverage('timeliness'),
+      valueAvg: metricAverage('valueForMoney')
+    };
+  }, [sortedRatings]);
   
   if (loading) {
     return (
@@ -159,20 +257,20 @@ const DesignerProfile = () => {
           }
         `}
       </style>
-      <div className="container mx-auto px-6 py-16 max-w-7xl">
+      <div className="container mx-auto px-6 py-10 max-w-7xl">
         {/* Designer Header */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-10 profile-card">
-          <div className="p-8 sm:p-10">
-            <div className="flex flex-col md:flex-row md:items-start">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 profile-card border border-slate-100">
+          <div className="p-6 sm:p-8">
+            <div className="flex flex-col md:flex-row md:items-start gap-6">
               <div className="flex-shrink-0 mb-6 md:mb-0">
-                <UserAvatar user={designer} sizeClass="w-28 h-28" textClass="text-4xl font-semibold" className="shadow-md" bgClass="bg-sky-500 text-white" />
+                <UserAvatar user={designer} sizeClass="w-24 h-24" textClass="text-3xl font-semibold" className="shadow-md" bgClass="bg-sky-500 text-white" />
               </div>
               
               <div className="md:ml-8 flex-1">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-                      {designer.username}
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+                      {designer.name || designer.username}
                     </h1>
 
                     {designer.professionalHeadline && (
@@ -181,27 +279,12 @@ const DesignerProfile = () => {
                     
                     {designer.averageRating > 0 && (
                       <div className="flex items-center mt-2">
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <svg 
-                              key={star}
-                              className={`w-6 h-6 star-rating transition-transform duration-200 ${
-                                star <= Math.round(designer.averageRating) 
-                                  ? 'text-yellow-400' 
-                                  : 'text-gray-300'
-                              }`} 
-                              fill="currentColor" 
-                              viewBox="0 0 20 20"
-                            >
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          ))}
-                        </div>
+                        {renderStarIcons(Math.round(designer.averageRating), 'w-5 h-5')}
                         <span className="text-sm font-medium text-gray-900 ml-2">
                           {designer.averageRating.toFixed(1)}
                         </span>
                         <span className="text-sm text-gray-500 ml-1">
-                          ({designer.ratings.length} reviews)
+                          ({Array.isArray(designer.ratings) ? designer.ratings.length : 0} reviews)
                         </span>
                       </div>
                     )}
@@ -253,16 +336,16 @@ const DesignerProfile = () => {
                 )}
                 
                 {isClient && currentUser?._id !== designer._id && (
-                  <div className="mt-8 flex flex-wrap gap-4">
+                  <div className="mt-6 flex flex-wrap gap-3">
                     <button
                       onClick={handleHireClick}
-                      className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg shadow-md text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300"
+                      className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-md text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300"
                     >
                       Hire for a Project
                     </button>
                     <button
                       onClick={handleMessageClick}
-                      className="inline-flex items-center px-6 py-3 border border-gray-200 text-sm font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300"
+                      className="inline-flex items-center px-5 py-2.5 border border-gray-200 text-sm font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all duration-300"
                     >
                       Message
                     </button>
@@ -274,7 +357,7 @@ const DesignerProfile = () => {
         </div>
         
         {/* Tabs */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-10">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-10 border border-slate-100">
           <div className="border-b border-gray-200">
             <nav className="flex -mb-px">
               <button
@@ -300,31 +383,34 @@ const DesignerProfile = () => {
             </nav>
           </div>
           
-          <div className="p-8">
+          <div className="p-6 md:p-8">
             {/* Portfolio Tab */}
             {activeTab === 'portfolio' && (
               <div>
                 {designer.portfolio && designer.portfolio.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {designer.portfolio.map((item, index) => (
-                      <div key={item._id || index} className="portfolio-card bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+                      <div key={item._id || index} className="portfolio-card bg-white border border-gray-100 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col">
                         {item.imageUrl ? (
                           <img 
                             src={item.imageUrl} 
                             alt={item.title} 
-                            className="w-full h-56 object-cover"
+                            className="w-full h-52 object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                         ) : (
-                          <div className="w-full h-56 bg-white flex items-center justify-center px-4 text-center text-sm text-gray-500 border-b border-gray-200">
+                          <div className="w-full h-52 bg-slate-50 flex items-center justify-center px-4 text-center text-sm text-gray-500 border-b border-gray-200">
                             No image uploaded for this project. Use links below to view the work.
                           </div>
                         )}
-                        <div className="p-6">
+                        <div className="p-5 flex-1 flex flex-col">
                           <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             {item.title}
                           </h3>
                           {item.description && (
-                            <p className="text-sm text-gray-600 line-clamp-3">
+                            <p className="text-sm text-gray-600 line-clamp-3 flex-1">
                               {item.description}
                             </p>
                           )}
@@ -364,8 +450,8 @@ const DesignerProfile = () => {
                             )}
                           </div>
 
-                          <p className="text-xs text-gray-500 mt-3">
-                            {new Date(item.createdAt).toLocaleDateString()}
+                          <p className="text-xs text-gray-500 mt-4">
+                            Added on {new Date(item.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -382,6 +468,25 @@ const DesignerProfile = () => {
             {/* Reviews Tab */}
             {activeTab === 'reviews' && (
               <div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Overall Rating</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{reviewInsights.average ? reviewInsights.average.toFixed(1) : 'New'}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Reviews</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{reviewInsights.total}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Would Recommend</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{reviewInsights.total ? `${reviewInsights.recommendRate}%` : '-'}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Response Quality</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{reviewInsights.communicationAvg ? reviewInsights.communicationAvg.toFixed(1) : '-'}</p>
+                  </div>
+                </div>
+
                 {/* Review Form (for clients only) */}
                 {isClient && currentUser?._id !== designer._id && (
                   <div className="mb-10 bg-gray-50 rounded-xl p-6 shadow-sm">
@@ -423,6 +528,100 @@ const DesignerProfile = () => {
                           ))}
                         </div>
                       </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                            Review Title
+                          </label>
+                          <input
+                            id="title"
+                            name="title"
+                            value={reviewForm.title}
+                            onChange={handleReviewChange}
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-sky-500 focus:border-sky-500 text-sm"
+                            placeholder="Great communication and delivery"
+                            maxLength={120}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="projectType" className="block text-sm font-medium text-gray-700 mb-2">
+                            Project Type
+                          </label>
+                          <select
+                            id="projectType"
+                            name="projectType"
+                            value={reviewForm.projectType}
+                            onChange={handleReviewChange}
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-sky-500 focus:border-sky-500 text-sm"
+                          >
+                            <option value="">Select project type</option>
+                            <option value="logo">Logo Design</option>
+                            <option value="branding">Brand Identity</option>
+                            <option value="uiux">UI/UX</option>
+                            <option value="web">Web Design</option>
+                            <option value="mobile">Mobile App Design</option>
+                            <option value="illustration">Illustration</option>
+                            <option value="print">Print Design</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Communication</label>
+                          <select
+                            name="communication"
+                            value={reviewForm.communication}
+                            onChange={handleReviewChange}
+                            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500"
+                          >
+                            {[1, 2, 3, 4, 5].map((value) => (
+                              <option key={value} value={value}>{value} / 5</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Timeliness</label>
+                          <select
+                            name="timeliness"
+                            value={reviewForm.timeliness}
+                            onChange={handleReviewChange}
+                            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500"
+                          >
+                            {[1, 2, 3, 4, 5].map((value) => (
+                              <option key={value} value={value}>{value} / 5</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Value for Money</label>
+                          <select
+                            name="valueForMoney"
+                            value={reviewForm.valueForMoney}
+                            onChange={handleReviewChange}
+                            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500"
+                          >
+                            {[1, 2, 3, 4, 5].map((value) => (
+                              <option key={value} value={value}>{value} / 5</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="mb-6">
+                        <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                          <input
+                            type="checkbox"
+                            name="wouldRecommend"
+                            checked={reviewForm.wouldRecommend}
+                            onChange={handleReviewChange}
+                            className="rounded border-gray-300 text-sky-500 focus:ring-sky-500"
+                          />
+                          I would recommend this designer
+                        </label>
+                      </div>
                       
                       <div className="mb-6">
                         <label htmlFor="review" className="block text-sm font-medium text-gray-700 mb-2">
@@ -451,48 +650,70 @@ const DesignerProfile = () => {
                 )}
                 
                 {/* Reviews List */}
-                {designer.ratings && designer.ratings.length > 0 ? (
+                {sortedRatings.length > 0 ? (
                   <div className="space-y-8">
-                    {designer.ratings.map((rating) => (
-                      <div key={rating._id} className="review-card border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
-                        <div className="flex items-start">
+                    {sortedRatings.map((rating) => {
+                      const reviewer = rating?.userId && typeof rating.userId === 'object' ? rating.userId : null;
+                      const reviewerName = reviewer?.name || reviewer?.username || 'Client';
+                      const hasDetailScores = [rating?.communication, rating?.timeliness, rating?.valueForMoney].some((value) => safeNumber(value) !== null);
+
+                      return (
+                      <div key={rating._id} className="review-card border border-gray-100 rounded-xl p-5 bg-white shadow-sm">
+                        <div className="flex items-start justify-between gap-4">
                           <div className="flex-shrink-0">
-                            <div className="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center text-sky-800 font-medium">
-                              C
-                            </div>
+                            <UserAvatar user={reviewer || { username: reviewerName }} sizeClass="w-12 h-12" className="shadow-sm" textClass="text-sm font-semibold" />
                           </div>
-                          <div className="ml-4">
-                            <div className="flex items-center">
-                              <div className="flex">
-                                {[1, 2, 3, 4, 5].map(star => (
-                                  <svg 
-                                    key={star}
-                                    className={`w-5 h-5 star-rating transition-transform duration-200 ${
-                                      star <= rating.rating 
-                                        ? 'text-yellow-400' 
-                                        : 'text-gray-300'
-                                    }`} 
-                                    fill="currentColor" 
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3 .921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                  </svg>
-                                ))}
-                              </div>
-                              <p className="text-xs text-gray-500 ml-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-sm font-semibold text-gray-900">{reviewerName}</p>
+                              {reviewer?.userType && (
+                                <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 capitalize">{reviewer.userType}</span>
+                              )}
+                              {rating?.projectType && (
+                                <span className="text-[11px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">{getProjectTypeLabel(rating.projectType)}</span>
+                              )}
+                              {rating?.wouldRecommend === true && (
+                                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Recommended</span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-3 mt-1">
+                              {renderStarIcons(Number(rating.rating || 0), 'w-4 h-4')}
+                              <p className="text-xs text-gray-500">
                                 {new Date(rating.createdAt).toLocaleDateString()}
                               </p>
                             </div>
-                            
+
+                            {rating?.title && (
+                              <p className="mt-2 text-sm font-medium text-gray-800">{rating.title}</p>
+                            )}
+
                             {rating.review && (
-                              <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+                              <p className="mt-2 text-sm text-gray-600 leading-relaxed">
                                 {rating.review}
                               </p>
+                            )}
+
+                            {hasDetailScores && (
+                              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                                <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
+                                  <span className="text-slate-500">Communication</span>
+                                  <p className="font-semibold text-slate-800">{rating.communication || '-'} / 5</p>
+                                </div>
+                                <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
+                                  <span className="text-slate-500">Timeliness</span>
+                                  <p className="font-semibold text-slate-800">{rating.timeliness || '-'} / 5</p>
+                                </div>
+                                <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
+                                  <span className="text-slate-500">Value</span>
+                                  <p className="font-semibold text-slate-800">{rating.valueForMoney || '-'} / 5</p>
+                                </div>
+                              </div>
                             )}
                           </div>
                         </div>
                       </div>
-                    ))}
+                    );})}
                   </div>
                 ) : (
                   <div className="text-center py-10">

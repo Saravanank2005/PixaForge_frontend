@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { formatDate } from '../../utils/formatters';
 import UserAvatar from '../common/UserAvatar';
 
 const Dashboard = () => {
@@ -15,6 +14,8 @@ const Dashboard = () => {
   });
   const [recentProjects, setRecentProjects] = useState([]);
   const [recentMessages, setRecentMessages] = useState([]);
+  const [nearbyPortfolioDesigners, setNearbyPortfolioDesigners] = useState([]);
+  const [usingLocationForPortfolios, setUsingLocationForPortfolios] = useState(false);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -65,7 +66,15 @@ const Dashboard = () => {
           try {
             // First get all designers regardless of location
             const designersRes = await api.get('/api/designers');
-            designerStats.total = designersRes.data.length;
+            const allDesigners = Array.isArray(designersRes.data) ? designersRes.data : [];
+            designerStats.total = allDesigners.length;
+
+            const fallbackPortfolioDesigners = allDesigners
+              .filter((designer) => Array.isArray(designer?.portfolio) && designer.portfolio.length > 0)
+              .slice(0, 4);
+
+            setNearbyPortfolioDesigners(fallbackPortfolioDesigners);
+            setUsingLocationForPortfolios(false);
             
             // Try to get nearby designers if geolocation is available
             try {
@@ -84,7 +93,17 @@ const Dashboard = () => {
                 }
               });
               
-              designerStats.nearby = nearbyDesignersRes.data.length;
+              const nearbyDesigners = Array.isArray(nearbyDesignersRes.data) ? nearbyDesignersRes.data : [];
+              designerStats.nearby = nearbyDesigners.length;
+
+              const nearbyWithPortfolio = nearbyDesigners
+                .filter((designer) => Array.isArray(designer?.portfolio) && designer.portfolio.length > 0)
+                .slice(0, 4);
+
+              if (nearbyWithPortfolio.length > 0) {
+                setNearbyPortfolioDesigners(nearbyWithPortfolio);
+                setUsingLocationForPortfolios(true);
+              }
             } catch (geoError) {
               // Silently fail for geolocation errors
             }
@@ -183,6 +202,28 @@ const Dashboard = () => {
             )}
           </div>
         </div>
+
+        {isClient && (
+          <div className="glass p-6 rounded-lg mt-6">
+            <h2 className="text-xl font-bold mb-4">Explore More</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link to="/app/marketplace" className="card hover-shadow-pop">
+                <div className="p-5">
+                  <h3 className="font-semibold text-lg">Talent Marketplace</h3>
+                  <p className="text-sm text-gray-600 mt-1">Browse ready-to-hire designers with portfolio-first cards.</p>
+                  <span className="inline-flex items-center text-sm font-semibold text-primary-700 mt-3">Open Marketplace</span>
+                </div>
+              </Link>
+              <Link to="/app/design-match" className="card hover-shadow-pop">
+                <div className="p-5">
+                  <h3 className="font-semibold text-lg">Design Match Studio</h3>
+                  <p className="text-sm text-gray-600 mt-1">Get personalized matches with what-if controls for budget and distance.</p>
+                  <span className="inline-flex items-center text-sm font-semibold text-primary-700 mt-3">Open Match Studio</span>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
         
         {/* Recent Projects Section */}
         <div className="glass p-6 rounded-lg mt-6">
@@ -268,6 +309,63 @@ const Dashboard = () => {
         </div>
         
         {/* Recent Messages Section */}
+        {isClient && nearbyPortfolioDesigners.length > 0 && (
+          <div className="glass p-6 rounded-lg mt-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold flex items-center">
+                <span className="p-2 rounded-lg bg-emerald-100 text-emerald-600 mr-3 dark:bg-opacity-20">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
+                  </svg>
+                </span>
+                {usingLocationForPortfolios ? 'Nearby Portfolio Picks' : 'Portfolio Picks For You'}
+              </h2>
+              <Link to="/app/designers" className="btn btn-primary text-sm">
+                View Designers
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              {nearbyPortfolioDesigners.map((designer) => {
+                const firstItem = Array.isArray(designer?.portfolio) ? designer.portfolio[0] : null;
+                const displayName = getDesignerDisplayName(designer);
+                const previewText = firstItem?.title || designer?.professionalHeadline || designer?.bio || 'Portfolio available';
+
+                return (
+                  <Link
+                    key={designer?._id || designer?.email || displayName}
+                    to={`/app/designers/${designer?._id}`}
+                    className="card hover-shadow-pop"
+                  >
+                    <div className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <UserAvatar user={designer} sizeClass="w-10 h-10" className="shadow-sm flex-shrink-0" textClass="text-sm font-semibold" />
+                        <div className="min-w-0">
+                          <h3 className="font-semibold truncate">{displayName}</h3>
+                          <p className="text-xs text-gray-500">{typeof designer?.distance === 'number' ? `${designer.distance.toFixed(1)} km away` : 'Designer near your preferences'}</p>
+                        </div>
+                      </div>
+
+                      {firstItem?.imageUrl ? (
+                        <img
+                          src={firstItem.imageUrl}
+                          alt={`${displayName} portfolio sample`}
+                          className="w-full h-28 object-cover rounded-lg mb-3"
+                        />
+                      ) : (
+                        <div className="w-full h-28 rounded-lg mb-3 bg-gradient-to-br from-slate-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900/50" />
+                      )}
+
+                      <p className="text-sm text-gray-600 line-clamp-2">{previewText}</p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Recent Messages Section */}
         <div className="glass p-6 rounded-lg mt-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center">
@@ -315,6 +413,9 @@ const getProjectUser = (project, role) => {
 
   return { user, label };
 };
+
+const getDesignerDisplayName = (designer) =>
+  designer?.name || designer?.username || designer?.fullName || 'Designer';
 
 // Helper function to get message partner info (id, name, initial)
 const getMessagePartnerInfo = (message, currentUser) => {

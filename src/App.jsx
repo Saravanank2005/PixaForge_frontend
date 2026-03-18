@@ -23,6 +23,8 @@ import NotFound from './components/common/NotFound';
 import LandingPage from './components/landing/LandingPage';
 import Help from './components/help/Help';
 import NotificationList from './components/notifications/NotificationList';
+import TalentMarketplace from './components/marketplace/TalentMarketplace';
+import DesignMatchStudio from './components/matching/DesignMatchStudio';
 
 // Import CSS
 import './styles/animations.css';
@@ -67,6 +69,8 @@ function App() {
                     <Route path="projects" element={<ProjectList />} />
                     <Route path="designers/:designerId" element={<DesignerProfile />} />
                     <Route path="designers" element={<DesignerList />} />
+                    <Route path="marketplace" element={<TalentMarketplace />} />
+                    <Route path="design-match" element={<DesignMatchStudio />} />
                     <Route path="help" element={<Help />} />
                     <Route path="notifications" element={<NotificationList />} />
                     <Route path="*" element={<NotFound />} />

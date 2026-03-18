@@ -9,8 +9,6 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    firstName: '',
-    lastName: '',
     userType: 'client',
     companyName: '',
     latitude: 0,  // Default value for all users
@@ -66,8 +64,7 @@ const Register = () => {
   
   const validateForm = () => {
     // Check if required fields are filled
-    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword ||
-        !formData.firstName || !formData.lastName) {
+    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
       setError('Please fill in all required fields');
       return false;
     }
@@ -91,12 +88,6 @@ const Register = () => {
       return false;
     }
     
-    // If user is a designer, check for location
-    if (formData.userType === 'designer' && (!formData.latitude || !formData.longitude)) {
-      setError('Please share your location to register as a designer');
-      return false;
-    }
-    
     return true;
   };
   
@@ -112,10 +103,9 @@ const Register = () => {
       setError('');
       setLoading(true);
       
-      // If user is a client and no location is set, use default coordinates
+      // If location is not shared, use default coordinates so users can continue onboarding.
       const registrationData = { ...formData };
-      if (registrationData.userType === 'client' && (!registrationData.latitude || !registrationData.longitude)) {
-        // Set default coordinates (these can be any valid coordinates)
+      if (!registrationData.latitude || !registrationData.longitude) {
         registrationData.latitude = 0;
         registrationData.longitude = 0;
       }
@@ -149,12 +139,13 @@ const Register = () => {
   }
   
   return (
-    <div className="auth-container">
+    <div className="auth-container auth-register-view">
       <div className="auth-background"></div>
       
       <div className="auth-card auth-register-card">
         <form className="auth-form auth-compact-form auth-register-refined" onSubmit={handleSubmit}>
           <div className="auth-form-header">
+            <span className="auth-mini-badge">Create Your Design Identity</span>
             <div className="auth-logo">
               <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
@@ -203,44 +194,6 @@ const Register = () => {
           
           <div className="auth-scrollable-section">
             <div className="auth-form-fields">
-              <div className="auth-form-row">
-                <div className="auth-form-field">
-                  <label htmlFor="firstName" className="auth-label">First Name</label>
-                  <div className="auth-input-wrapper">
-                    <input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      className="auth-input auth-input-with-icon"
-                      placeholder="Your first name"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                    />
-                    <svg className="auth-input-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-                
-                <div className="auth-form-field">
-                  <label htmlFor="lastName" className="auth-label">Last Name</label>
-                  <div className="auth-input-wrapper">
-                    <input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      className="auth-input auth-input-with-icon"
-                      placeholder="Your last name"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                    />
-                    <svg className="auth-input-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              
               <div className="auth-form-field full-span">
                 <label htmlFor="username" className="auth-label">Username</label>
                 <div className="auth-input-wrapper">
@@ -337,18 +290,16 @@ const Register = () => {
                     <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                     </svg>
-                    <span className="font-medium">Location Information</span>
+                    <span className="font-medium">Location (optional)</span>
                   </div>
-                  <p className="auth-subtitle text-sm mb-3">
-                    As a designer, sharing your location helps clients find you in their area.
-                  </p>
+                  <p className="auth-location-note">Share to appear in nearby search results.</p>
                   
-                  <div className="flex items-center space-x-2">
+                  <div className="auth-location-action-row">
                     <button
                       type="button"
                       onClick={handleGetLocation}
                       disabled={locationLoading}
-                      className="auth-button auth-button-secondary flex-1"
+                      className="auth-location-btn"
                     >
                       {locationLoading ? (
                         <>
@@ -357,7 +308,7 @@ const Register = () => {
                         </>
                       ) : (
                         <>
-                          <svg className="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                           </svg>
                           <span>Share My Location</span>
@@ -366,13 +317,15 @@ const Register = () => {
                     </button>
                   </div>
                   
-                  {formData.latitude && formData.longitude && (
-                    <div className="mt-2 text-xs text-green-700 flex items-center">
+                  {formData.latitude && formData.longitude ? (
+                    <div className="auth-location-status success">
                       <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                       <span>Location successfully captured</span>
                     </div>
+                  ) : (
+                    <div className="auth-location-status muted">You can skip this now and add it later.</div>
                   )}
                 </div>
               )}

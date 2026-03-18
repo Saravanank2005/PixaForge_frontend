@@ -11,7 +11,9 @@ import {
   Squares2X2Icon,
   BellIcon,
   QuestionMarkCircleIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  BriefcaseIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 import api from '../../utils/api';
@@ -106,6 +108,18 @@ const Sidebar = ({ open, toggleSidebar }) => {
           name: 'Browse Designers',
           path: '/app/designers',
           icon: UsersIcon,
+          showTo: ['client'],
+        },
+        {
+          name: 'Talent Marketplace',
+          path: '/app/marketplace',
+          icon: BriefcaseIcon,
+          showTo: ['client'],
+        },
+        {
+          name: 'Design Match Studio',
+          path: '/app/design-match',
+          icon: SparklesIcon,
           showTo: ['client'],
         },
         {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
+import UserAvatar from '../common/UserAvatar';
 
 const ProjectList = () => {
   const { isClient, isDesigner, currentUser } = useAuth();
@@ -78,6 +79,29 @@ const ProjectList = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getProjectParticipant = (project) => {
+    if (isClient) {
+      const designer = project?.designerId && typeof project.designerId === 'object' ? project.designerId : null;
+      if (designer) {
+        return {
+          user: designer,
+          label: designer.name || designer.username || 'Designer'
+        };
+      }
+
+      return {
+        user: null,
+        label: project?.projectType === 'bidding' ? 'Open Bids' : 'Designer'
+      };
+    }
+
+    const client = project?.clientId && typeof project.clientId === 'object' ? project.clientId : null;
+    return {
+      user: client,
+      label: client?.name || client?.username || 'Client'
+    };
   };
   
   return (
@@ -257,6 +281,9 @@ const ProjectList = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project, index) => (
+            (() => {
+              const participant = getProjectParticipant(project);
+              return (
             <Link
               key={`${project._id}-${index}`}
               to={`/app/projects/${project._id}`}
@@ -301,17 +328,14 @@ const ProjectList = () => {
                   </div>
                   
                   <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-medium">
-                      {isClient 
-                        ? project.designerId?.username?.charAt(0).toUpperCase() || 'B'
-                        : project.clientId?.username?.charAt(0).toUpperCase() || 'C'
-                      }
-                    </div>
+                    <UserAvatar
+                      user={participant.user || { username: participant.label }}
+                      sizeClass="w-8 h-8"
+                      textClass="text-xs font-semibold"
+                      className="shadow-sm"
+                    />
                     <span className="ml-2 text-sm text-gray-700 truncate max-w-[100px]">
-                      {isClient 
-                        ? project.designerId?.username || (project.projectType === 'bidding' ? 'Open Bids' : 'Designer')
-                        : project.clientId?.username || 'Client'
-                      }
+                      {participant.label}
                     </span>
                   </div>
                 </div>
@@ -324,6 +348,8 @@ const ProjectList = () => {
                 </div>
               </div>
             </Link>
+              );
+            })()
           ))}
         </div>
       )}

@@ -4,6 +4,32 @@ import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import UserAvatar from '../common/UserAvatar';
 
+const projectQuickStarts = [
+  {
+    label: 'Logo Sprint',
+    title: 'Logo Design for New Brand Launch',
+    description:
+      'Need a modern logo system for a new digital-first brand. Please share 3 visual directions, rationale, and final source files.',
+    deliverables: '3 logo concepts, 1 final logo pack, color variants, source files (AI/SVG/PNG)'
+  },
+  {
+    label: 'Social Pack',
+    title: 'Social Media Creative Kit',
+    description:
+      'Looking for reusable social templates with a premium visual style for monthly campaigns across Instagram and LinkedIn.',
+    deliverables: '12 editable templates, 4 cover designs, brand style adaptation, export-ready assets'
+  },
+  {
+    label: 'App UI',
+    title: 'Mobile App UI Design',
+    description:
+      'Need polished screens for onboarding, dashboard, and profile flows with clear hierarchy and conversion-focused interactions.',
+    deliverables: 'UI kit, 12 high-fidelity screens, clickable prototype, handoff notes'
+  }
+];
+
+const budgetSuggestions = ['5000', '10000', '25000', '50000'];
+
 const CreateProject = () => {
   const { isClient } = useAuth();
   const navigate = useNavigate();
@@ -28,6 +54,7 @@ const CreateProject = () => {
   const [loading, setLoading] = useState(false);
   const [designersLoading, setDesignersLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showOptionalFields, setShowOptionalFields] = useState(false);
   
   // Redirect if not a client
   useEffect(() => {
@@ -121,20 +148,32 @@ const CreateProject = () => {
       setLoading(false);
     }
   };
+
+  const applyQuickStart = (template) => {
+    setFormData((prev) => ({
+      ...prev,
+      title: template.title,
+      description: template.description,
+      deliverables: template.deliverables
+    }));
+  };
   
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
+        <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-cyan-700 bg-cyan-100 mb-3">
+          Smart Project Composer
+        </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Create New Project</h1>
         <p className="text-gray-600">
-          Define your project details and hire a designer to bring your vision to life.
+          Define essentials first, then optionally add details. Built for fast project posting.
         </p>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Project Form */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-xl shadow border border-cyan-50 p-6">
             {error && (
               <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4">
                 <p className="text-sm text-red-700">{error}</p>
@@ -142,6 +181,24 @@ const CreateProject = () => {
             )}
             
             <form onSubmit={handleSubmit}>
+              <div className="mb-5">
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  Quick Start Templates
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {projectQuickStarts.map((template) => (
+                    <button
+                      key={template.label}
+                      type="button"
+                      className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 border border-slate-300 hover:border-cyan-400 hover:text-cyan-700 hover:bg-cyan-50 transition"
+                      onClick={() => applyQuickStart(template)}
+                    >
+                      {template.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Hiring Mode *
@@ -256,36 +313,63 @@ const CreateProject = () => {
                   placeholder="Enter your budget"
                   required
                 />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {budgetSuggestions.map((amount) => (
+                    <button
+                      key={amount}
+                      type="button"
+                      className="px-2.5 py-1 rounded-md text-xs font-medium border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition"
+                      onClick={() => setFormData((prev) => ({ ...prev, budget: amount }))}
+                    >
+                      ₹{Number(amount).toLocaleString('en-IN')}
+                    </button>
+                  ))}
+                </div>
               </div>
-              
-              <div className="mb-4">
-                <label htmlFor="deliverables" className="block text-sm font-medium text-gray-700 mb-1">
-                  Deliverables
-                </label>
-                <textarea
-                  id="deliverables"
-                  name="deliverables"
-                  rows="3"
-                  value={formData.deliverables}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  placeholder="List the specific deliverables you expect (e.g., 3 logo concepts, source files, etc.)"
-                ></textarea>
-              </div>
-              
-              <div className="mb-6">
-                <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 mb-1">
-                  Deadline
-                </label>
-                <input
-                  type="date"
-                  id="deadline"
-                  name="deadline"
-                  value={formData.deadline}
-                  onChange={handleChange}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                />
+
+              <div className="mb-6 border border-gray-200 rounded-lg">
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-between px-4 py-3 text-left"
+                  onClick={() => setShowOptionalFields((prev) => !prev)}
+                >
+                  <span className="text-sm font-semibold text-gray-800">Optional Details (deliverables, deadline)</span>
+                  <span className="text-xs font-medium text-cyan-700">{showOptionalFields ? 'Hide' : 'Add'}</span>
+                </button>
+
+                {showOptionalFields && (
+                  <div className="px-4 pb-4">
+                    <div className="mb-4">
+                      <label htmlFor="deliverables" className="block text-sm font-medium text-gray-700 mb-1">
+                        Deliverables
+                      </label>
+                      <textarea
+                        id="deliverables"
+                        name="deliverables"
+                        rows="3"
+                        value={formData.deliverables}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="List specific outputs (e.g., 3 logo concepts, source files, usage guide)"
+                      ></textarea>
+                    </div>
+
+                    <div>
+                      <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 mb-1">
+                        Deadline
+                      </label>
+                      <input
+                        type="date"
+                        id="deadline"
+                        name="deadline"
+                        value={formData.deadline}
+                        onChange={handleChange}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="flex items-center justify-end space-x-3">
