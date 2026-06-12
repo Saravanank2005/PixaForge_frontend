@@ -4,7 +4,7 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV
     ? 'http://localhost:5000'
-    : 'https://bidlance-backend.onrender.com');
+    : 'https://pixaforge-backend-mxfk.onrender.com');
 
 // Create axios instance with base URL
 const api = axios.create({
