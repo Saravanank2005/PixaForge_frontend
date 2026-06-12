@@ -38,33 +38,12 @@ PixaForge is a modern platform that revolutionizes how clients and designers col
 
 ## 📋 Quick Start
 
-### Prerequisites
-- Node.js (v14+)
-- npm or yarn
-- Git
+### Try the Live Demo
+- Visit: https://pixa-forge-frontend.vercel.app
+- Sign up as a Client or Designer
+- Explore all features!
 
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Saravanank2005/PixaForge_frontend.git
-   cd PixaForge_frontend
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Start development server:**
-   ```bash
-   npm run dev
-   ```
-
-4. **Build for production:**
-   ```bash
-   npm run build
-   ```
+**This is a demonstration project.** If you'd like to learn more about the implementation or discuss similar projects, feel free to contact us.
 
 ## 🔐 Security
 
@@ -96,33 +75,26 @@ PixaForge integrates Stripe for secure transactions:
 - Search by skills
 - Radius-based discovery
 
-## 🧪 Available Commands
+## ✨ What Makes PixaForge Special
 
-```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run preview  # Preview production build
-npm run lint     # Run linter
-```
+- **Real-Time Communication** - Instant messaging and notifications
+- **Location Intelligence** - Find talent near you
+- **Secure Transactions** - Stripe-powered payments
+- **Portfolio-First** - Designers showcase their best work
+- **Quality Matching** - Smart designer discovery algorithm
+- **Professional Platform** - Clean, intuitive interface
 
-## 🤝 Contributing
+## 📧 Support & Suggestions
 
-Contributions are welcome! 
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push and open a Pull Request
-
-## 📧 Support
-
-- **Website:** https://pixa-forge-frontend.vercel.app
+Have suggestions or feedback? We'd love to hear from you!
+- **Email:** saravanank20051012@gmail.com
 - **Report Issues:** [GitHub Issues](https://github.com/Saravanank2005/PixaForge_frontend/issues)
-- **Email:** support@pixaforge.com
+
+**Note:** This project is for demonstration purposes. For questions, feature requests, or collaboration opportunities, please contact us via email.
 
 ## 📄 License
 
-ISC License
+ISC License - Personal Use Only
 
 ## 🙏 Built With
 
@@ -137,4 +109,4 @@ ISC License
 
 **Made with ❤️ by PixaForge Team**
 
-[Try Now](https://pixa-forge-frontend.vercel.app) • [Report Bug](https://github.com/Saravanank2005/PixaForge_frontend/issues) • [Contact](mailto:support@pixaforge.com)
+[Try Now](https://pixa-forge-frontend.vercel.app) • [Report Issue](https://github.com/Saravanank2005/PixaForge_frontend/issues) • [Suggest Feature](mailto:saravanank20051012@gmail.com)
