@@ -2,133 +2,53 @@
 
 **A Location-Based Marketplace Connecting Clients with Professional Designers**
 
-PixaForge is a comprehensive platform that revolutionizes how clients and designers collaborate. Using advanced location intelligence, real-time communication, and secure payment processing, PixaForge enables seamless project-based connections between creative professionals and clients seeking design services.
+PixaForge is a modern platform that revolutionizes how clients and designers collaborate. Using advanced location intelligence, real-time communication, and secure payment processing, PixaForge enables seamless project-based connections between creative professionals and clients seeking design services.
 
 ## 🌟 Key Features
 
 ### For Clients
-- 📍 **Location-Based Designer Discovery** - Find designers near you using an interactive map interface
-- 🎯 **Smart Matching** - Discover designers whose expertise matches your project needs through the Design Match Studio
-- 💼 **Project Management** - Create, track, and manage multiple design projects with milestone tracking
-- 💬 **Direct Messaging** - Real-time communication with designers for project discussions and updates
-- 📦 **Portfolio Review** - View designer portfolios to evaluate their work quality before hiring
-- 💳 **Secure Payments** - Process payments safely through Stripe integration
-- 🔔 **Real-time Notifications** - Stay updated on project changes, messages, and milestones
+- 📍 **Location-Based Designer Discovery** - Find designers near you using an interactive map
+- 🎯 **Smart Matching** - Discover designers whose expertise matches your project needs
+- 💼 **Project Management** - Create, track, and manage design projects efficiently
+- 💬 **Direct Messaging** - Real-time communication with designers
+- 📦 **Portfolio Review** - View designer portfolios before hiring
+- 💳 **Secure Payments** - Process payments safely through Stripe
+- 🔔 **Real-time Notifications** - Stay updated on project changes
 
 ### For Designers
-- 🌍 **Local Visibility** - Get discovered by clients in your area through map-based search
-- 🎨 **Portfolio Showcase** - Upload and manage your design portfolio with categories and descriptions
-- 👤 **Professional Profile** - Build a comprehensive profile showcasing your skills, experience, and rates
-- 💼 **Talent Marketplace** - Access available projects in your skill categories
-- 📞 **Client Communication** - Direct messaging with clients for project requirements and feedback
-- 💰 **Payment Management** - Receive payments securely through integrated payment system
-- 📊 **Project History** - Track completed projects and client reviews
+- 🌍 **Local Visibility** - Get discovered by clients in your area
+- 🎨 **Portfolio Showcase** - Upload and manage your design portfolio
+- 👤 **Professional Profile** - Build a comprehensive profile with skills and rates
+- 💼 **Project Marketplace** - Access available projects matching your expertise
+- 📞 **Client Communication** - Direct messaging for project requirements
+- 💰 **Secure Payments** - Receive payments through integrated payment system
+- 📊 **Track Work** - Manage completed projects and client reviews
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-### Frontend
-- **React 18.2** - Modern UI library with hooks
-- **Vite** - Next-generation build tool for lightning-fast development
-- **Tailwind CSS** - Utility-first CSS framework for responsive design
-- **Material-UI (MUI)** - Component library for polished UI
-- **Leaflet & Pigeon Maps** - Interactive mapping for location-based discovery
-- **React Router** - Client-side routing
-- **Axios** - HTTP client for API communication
-- **Socket.io** - Real-time messaging and notifications
-- **Framer Motion & GSAP** - Advanced animations and transitions
-- **Stripe** - Payment processing integration
+**Frontend:** React, Vite, Tailwind CSS, Material-UI, Leaflet Maps, Socket.io  
+**Backend:** Node.js, Express, MongoDB, Stripe API, Cloudinary  
+**Deployment:** Vercel (Frontend), Render (Backend)
 
-### Backend
-- **Node.js & Express** - Scalable server framework
-- **MongoDB** - Flexible NoSQL database for dynamic data structures
-- **Socket.io** - Real-time bidirectional communication
-- **JWT** - Secure token-based authentication
-- **Cloudinary** - Cloud image storage and optimization
-- **Stripe API** - Payment processing and webhook handling
-- **Multer** - File upload handling
-- **Bcryptjs** - Password hashing and security
+## 🚀 Live Demo
 
-## 📂 Project Structure
+**Try PixaForge now:**
+- **Website:** https://pixa-forge-frontend.vercel.app
+- **Backend API:** https://pixaforge-backend-mxfk.onrender.com
 
-```
-PixaForge/
-├── client/                          # React frontend application
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── auth/               # Authentication components (Login, Register)
-│   │   │   ├── common/             # Reusable UI components
-│   │   │   ├── dashboard/          # Dashboard views
-│   │   │   ├── designers/          # Designer profile and discovery
-│   │   │   ├── layout/             # App layout (Navbar, Sidebar)
-│   │   │   ├── landing/            # Landing page
-│   │   │   ├── messages/           # Messaging interface
-│   │   │   ├── notifications/      # Notification system
-│   │   │   ├── profile/            # User profile and portfolio
-│   │   │   ├── projects/           # Project management
-│   │   │   └── marketplace/        # Talent marketplace
-│   │   ├── contexts/               # React Context (Auth, Theme, Notifications)
-│   │   ├── utils/                  # Utility functions and API calls
-│   │   └── styles/                 # Global and component styles
-│   ├── index.html
-│   ├── vite.config.js             # Vite configuration
-│   ├── tailwind.config.js          # Tailwind CSS setup
-│   ├── package.json
-│   └── .env                        # Environment variables
-│
-├── server/                          # Node.js backend
-│   ├── models/                      # Database schemas
-│   │   ├── User.js                 # User account model
-│   │   ├── Project.js              # Project model
-│   │   ├── Message.js              # Messaging model
-│   │   ├── Notification.js         # Notification model
-│   │   └── Payment.js              # Payment model
-│   ├── routes/                      # API endpoints
-│   │   ├── auth.js                 # Authentication endpoints
-│   │   ├── designers.js            # Designer discovery
-│   │   ├── projects.js             # Project management
-│   │   ├── messages.js             # Messaging endpoints
-│   │   ├── notifications.js        # Notification management
-│   │   ├── payments.js             # Payment processing
-│   │   └── uploads.js              # File upload handling
-│   ├── middleware/                  # Custom middleware
-│   │   ├── auth.js                 # JWT verification
-│   │   └── upload.js               # File upload configuration
-│   ├── index.js                    # Express server setup
-│   └── package.json
-│
-└── README.md                        # This file
-```
+## 📋 Quick Start
 
-## 🚀 Live Deployment
+### Prerequisites
+- Node.js (v14+)
+- npm or yarn
+- Git
 
-### Frontend (Vercel)
-- **Production:** https://pixa-forge-frontend.vercel.app
-- **Preview:** https://pixa-forge-frontend-git-main-sk26.vercel.app
-- **Deployment:** https://pixa-forge-frontend-huwrv4xa7-sk26.vercel.app
+### Installation
 
-### Backend (Render)
-- **API:** https://pixaforge-backend-mxfk.onrender.com
-
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
-- **Node.js** (v14 or higher)
-- **npm** or **yarn** package manager
-- **MongoDB** (local or cloud instance via MongoDB Atlas)
-- **Git** for version control
-
-### Required Accounts
-- **Cloudinary** - For image storage and optimization
-- **Stripe** - For payment processing
-- **MongoDB Atlas** - For cloud database (optional if using local MongoDB)
-
-## 🔧 Setup Instructions
-
-### Backend Setup
-
-1. **Navigate to server directory:**
+1. **Clone the repository:**
    ```bash
-   cd server
+   git clone https://github.com/Saravanank2005/PixaForge_frontend.git
+   cd PixaForge_frontend
    ```
 
 2. **Install dependencies:**
@@ -136,266 +56,85 @@ Before you begin, ensure you have the following installed:
    npm install
    ```
 
-3. **Create `.env` file with required variables:**
-   ```env
-   PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/pixaforge
-   JWT_SECRET=your_jwt_secret_key_here
-   CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-   CLOUDINARY_API_KEY=your_cloudinary_api_key
-   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-   STRIPE_SECRET_KEY=your_stripe_secret_key
-   CLIENT_URL=http://localhost:5173
-   ```
-
-4. **Start the development server:**
+3. **Start development server:**
    ```bash
    npm run dev
    ```
-   Server will run on `http://localhost:5000`
 
-### Frontend Setup
-
-1. **Navigate to client directory:**
-   ```bash
-   cd client
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Create `.env` file:**
-   ```env
-   VITE_API_URL=https://pixaforge-backend-mxfk.onrender.com
-   ```
-
-4. **Start development server:**
-   ```bash
-   npm run dev
-   ```
-   Frontend will run on `http://localhost:5173`
-
-5. **Build for production:**
+4. **Build for production:**
    ```bash
    npm run build
    ```
 
-## 🔐 Authentication
+## 🔐 Security
 
-PixaForge uses JWT (JSON Web Tokens) for secure authentication:
+- JWT-based authentication
+- Password encryption
+- CORS protection
+- Input validation
+- Secure payment processing with Stripe
 
-### Registration Flow
-1. User creates account (Client or Designer role)
-2. Password is hashed using bcryptjs
-3. JWT token is generated and stored in localStorage
-4. User is redirected to dashboard
+## 💳 Payments
 
-### Login Flow
-1. User enters credentials
-2. Password verified against stored hash
-3. JWT token issued with user information
-4. Token used for all subsequent API requests
-
-### Token Storage
-- Stored in browser localStorage
-- Sent in Authorization header for API calls
-- Automatically refreshed on token expiration
-
-## 💳 Payment Integration
-
-### Stripe Integration
-- Secure payment processing for project payments
-- Webhook handling for payment confirmations
+PixaForge integrates Stripe for secure transactions:
+- Safe payment processing
 - Payment history tracking
+- Automated confirmations
 - Invoice generation
-
-### Payment Flow
-1. Client initiates payment for project
-2. Stripe payment form displayed
-3. Payment processed securely
-4. Confirmation sent to both parties
-5. Project status updated
 
 ## 📱 Real-Time Features
 
-### Socket.io Integration
-- **Live Messaging** - Instant message delivery
-- **Notifications** - Real-time project updates
-- **Presence** - See which designers/clients are online
-- **Activity Feed** - Live updates on project activity
+- Live messaging between clients and designers
+- Real-time project notifications
+- Instant activity updates
+- Online status indicators
 
-### Notification Types
-- Message notifications
-- Project status updates
-- Payment confirmations
-- New project inquiries
-- Portfolio activity
+## 🗺️ Location-Based Discovery
 
-## 🗺️ Location Features
+- Interactive map interface
+- Location-based filtering
+- Search by skills
+- Radius-based discovery
 
-### Map-Based Discovery
-- Interactive Leaflet map interface
-- Filter designers by location radius
-- View designer profiles from map
-- Real-time location updates
+## 🧪 Available Commands
 
-### Designer Search
-- Search by location
-- Filter by skills and experience
-- Sort by rating and reviews
-- View portfolio directly
-
-## 📊 Database Schema Overview
-
-### User Model
-```javascript
-{
-  name, email, password,
-  role: 'client' | 'designer',
-  location: { lat, lng },
-  skills: [],
-  portfolio: [],
-  rating, reviews,
-  profilePicture, bio
-}
-```
-
-### Project Model
-```javascript
-{
-  title, description, budget,
-  client, assignedDesigner,
-  status: 'open' | 'assigned' | 'in-progress' | 'completed',
-  timeline, deliverables,
-  messages, files,
-  createdAt, updatedAt
-}
-```
-
-### Message Model
-```javascript
-{
-  sender, receiver,
-  projectId, content,
-  attachments, read,
-  timestamp
-}
-```
-
-## 🧪 Testing & Development
-
-### Development Commands
 ```bash
-# Frontend
-npm run dev      # Start dev server with HMR
+npm run dev      # Start development server
 npm run build    # Build for production
 npm run preview  # Preview production build
-npm run lint     # Run ESLint
-
-# Backend
-npm run dev      # Start with nodemon
-npm start        # Start production server
+npm run lint     # Run linter
 ```
-
-## 🐛 Common Issues & Solutions
-
-### "Cannot connect to MongoDB"
-- Ensure MongoDB is running locally or connection string is valid
-- Check `MONGODB_URI` in `.env`
-
-### "Payment processing fails"
-- Verify Stripe API keys are correct
-- Check Stripe account is in live mode for production
-
-### "Images not uploading"
-- Verify Cloudinary credentials are correct
-- Check upload folder permissions
-
-### "WebSocket connection fails"
-- Ensure Socket.io is configured on both frontend and backend
-- Check CORS settings for production URLs
-
-## 📈 Performance Optimizations
-
-- **Code Splitting** - Route-based code splitting with React.lazy
-- **Image Optimization** - Cloudinary auto-optimization
-- **Caching** - HTTP caching headers on static assets
-- **Database Indexing** - Indexed queries for fast searches
-- **CDN** - Vercel CDN for global distribution
-
-## 🔒 Security Features
-
-- **JWT Authentication** - Secure token-based auth
-- **Password Hashing** - Bcryptjs for secure storage
-- **CORS Protection** - Configured CORS headers
-- **Input Validation** - Server-side validation for all inputs
-- **SQL Injection Prevention** - Mongoose ODM prevents NoSQL injection
-- **XSS Protection** - React escapes content by default
-
-## 📄 API Documentation
-
-### Key Endpoints
-
-#### Authentication
-- `POST /api/auth/register` - Create new account
-- `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get current user profile
-- `PUT /api/auth/profile` - Update user profile
-
-#### Designers
-- `GET /api/designers` - List all designers
-- `GET /api/designers/:id` - Get designer profile
-- `PUT /api/designers/:id` - Update designer profile
-- `GET /api/designers/location/search` - Search by location
-
-#### Projects
-- `POST /api/projects` - Create new project
-- `GET /api/projects` - Get user's projects
-- `GET /api/projects/:id` - Get project details
-- `PUT /api/projects/:id` - Update project
-- `POST /api/projects/:id/assign` - Assign designer
-
-#### Messages
-- `GET /api/messages/:projectId` - Get project messages
-- `POST /api/messages` - Send message
-- `GET /api/conversations` - Get all conversations
-
-#### Payments
-- `POST /api/payments` - Process payment
-- `GET /api/payments/history` - Get payment history
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
+Contributions are welcome! 
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Commit your changes
+4. Push and open a Pull Request
+
+## 📧 Support
+
+- **Website:** https://pixa-forge-frontend.vercel.app
+- **Report Issues:** [GitHub Issues](https://github.com/Saravanank2005/PixaForge_frontend/issues)
+- **Email:** support@pixaforge.com
 
 ## 📄 License
 
-This project is licensed under the ISC License - see LICENSE file for details.
+ISC License
 
-## 📧 Support & Contact
+## 🙏 Built With
 
-For support, questions, or feedback:
-- **Email:** support@pixaforge.com
-- **GitHub Issues:** [Report a bug](https://github.com/Saravanank2005/PixaForge_frontend/issues)
-- **Documentation:** See `/docs` folder for detailed guides
-
-## 🙏 Acknowledgments
-
-- Built with React, Node.js, and MongoDB
-- UI Components from Material-UI
-- Maps powered by Leaflet
-- Payments by Stripe
-- Storage by Cloudinary
-- Deployed on Vercel and Render
+- React & Vite
+- Node.js & MongoDB
+- Material-UI
+- Leaflet Maps
+- Stripe
+- Cloudinary
 
 ---
 
 **Made with ❤️ by PixaForge Team**
+
+[Try Now](https://pixa-forge-frontend.vercel.app) • [Report Bug](https://github.com/Saravanank2005/PixaForge_frontend/issues) • [Contact](mailto:support@pixaforge.com)
